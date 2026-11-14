@@ -1,0 +1,36 @@
+
+name: Update Fresh Spin Music
+
+on:
+  schedule:
+    - cron: '17 12 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-music:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Update music previews and artwork
+        run: python update_feed.py
+
+      - name: Commit updated music feed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/feed.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Refresh Fresh Spin music"
+            git push
+          fi
