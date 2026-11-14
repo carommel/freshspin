@@ -1,4 +1,3 @@
-
 {
   "items": [
     {
@@ -8,9 +7,9 @@
       "genre": "Soul",
       "category": "old",
       "description": "1971 · A timeless soul classic.",
-      "artwork": "",
-      "previewUrl": "",
-      "listenUrl": "https://music.apple.com/ca/search?term=Marvin%20Gaye%20Whats%20Going%20On"
+      "artwork": "https://is1-ssl.mzstatic.com/image/thumb/Music112/v4/76/36/2d/76362d74-cb7a-8ef9-104e-cde1d858e9a9/20UMGIM95279.rgb.jpg/600x600bb.jpg",
+      "previewUrl": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/08/f3/f4/08f3f452-b24f-e25b-92bc-15850f1bdc6a/mzaf_14002930736666872327.plus.aac.p.m4a",
+      "listenUrl": "https://music.apple.com/ca/album/whats-going-on/1538081586?i=1538081594&uo=4"
     },
     {
       "id": "aaliyah-one-in-a-million",
@@ -19,9 +18,9 @@
       "genre": "R&B",
       "category": "old",
       "description": "1996 · A defining sound of 90s R&B.",
-      "artwork": "",
-      "previewUrl": "",
-      "listenUrl": "https://music.apple.com/ca/search?term=Aaliyah%20One%20in%20a%20Million"
+      "artwork": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/1f/c5/d8/1fc5d881-cced-601d-6ab2-67772c02e5f9/194690589874.jpg/600x600bb.jpg",
+      "previewUrl": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/f9/75/3b/f9753bf3-18ab-012a-ff2a-5fae0f7651a9/mzaf_1034651293998265676.plus.aac.p.m4a",
+      "listenUrl": "https://music.apple.com/ca/album/one-in-a-million/1769721510?i=1769721513&uo=4"
     },
     {
       "id": "roy-ayers-everybody-loves",
@@ -30,9 +29,9 @@
       "genre": "Jazz",
       "category": "old",
       "description": "1976 · Warm jazz-funk for any afternoon.",
-      "artwork": "",
-      "previewUrl": "",
-      "listenUrl": "https://music.apple.com/ca/search?term=Roy%20Ayers%20Everybody%20Loves%20the%20Sunshine"
+      "artwork": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/e1/0e/28/e10e28c1-bed6-3143-cb91-265ba590bc35/15UMGIM65435.rgb.jpg/600x600bb.jpg",
+      "previewUrl": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/2f/7a/dd/2f7add2b-fb36-eea7-6ac1-db7fb01fd16c/mzaf_13195968331425689934.plus.aac.p.m4a",
+      "listenUrl": "https://music.apple.com/ca/album/everybody-loves-the-sunshine/1469585186?i=1469585198&uo=4"
     },
     {
       "id": "lauryn-hill-ex-factor",
@@ -41,9 +40,9 @@
       "genre": "R&B",
       "category": "old",
       "description": "1998 · Soulful storytelling and unforgettable vocals.",
-      "artwork": "",
-      "previewUrl": "",
-      "listenUrl": "https://music.apple.com/ca/search?term=Lauryn%20Hill%20Ex%20Factor"
+      "artwork": "https://is1-ssl.mzstatic.com/image/thumb/Music/47/95/fe/mzi.gzwdeznw.jpg/600x600bb.jpg",
+      "previewUrl": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/01/47/a0/0147a0fc-2061-cd89-dd48-92b2ea3dea03/mzaf_17865406853251902972.plus.aac.p.m4a",
+      "listenUrl": "https://music.apple.com/ca/album/ex-factor/457331030?i=457331033&uo=4"
     },
     {
       "id": "nas-ny-state-of-mind",
@@ -52,9 +51,9 @@
       "genre": "Hip-hop",
       "category": "old",
       "description": "1994 · A landmark East Coast hip-hop recording.",
-      "artwork": "",
-      "previewUrl": "",
-      "listenUrl": "https://music.apple.com/ca/search?term=Nas%20NY%20State%20of%20Mind"
+      "artwork": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/b9/eb/cc/b9ebccbc-5ba4-2cdb-5332-b065739abd9a/886444567619.jpg/600x600bb.jpg",
+      "previewUrl": "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/59/74/b2/5974b206-28f9-0444-76f1-833bc416d4fb/mzaf_869709703522937445.plus.aac.p.m4a",
+      "listenUrl": "https://music.apple.com/ca/album/n-y-state-of-mind/856131729?i=856131732&uo=4"
     }
   ]
 }
