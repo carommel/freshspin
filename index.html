@@ -75,6 +75,9 @@ let tracks=[],tab="all",playing=null;
 const audio=new Audio();
 const $=id=>document.getElementById(id);
 let saved=new Set(JSON.parse(localStorage.getItem("freshspin-saved")||"[]"));
+let savedTracks = JSON.parse(
+  localStorage.getItem("freshspin-saved-tracks") || "{}"
+);
 
 function escapeHTML(s){
 return String(s??"").replace(/[&<>"']/g,c=>({
@@ -97,7 +100,14 @@ playing=null;
 function render(){
 const q=$("search").value.toLowerCase();
 const g=$("genre").value.toLowerCase();
-const filtered=tracks.filter(t=>
+const availableTracks = tab === "saved"
+  ? Object.values(savedTracks).concat(
+      tracks.filter(t => saved.has(String(t.id)) && !savedTracks[String(t.id)])
+    )
+  : tracks;
+
+const filtered=availableTracks.filter(t=>
+
 (tab==="all"||(tab==="saved"?saved.has(String(t.id)):t.category===tab)) &&
 (g==="all"||t.genre.toLowerCase().includes(g)) &&
 (t.title+" "+t.artist).toLowerCase().includes(q)
@@ -128,12 +138,31 @@ const play=e.target.closest("[data-play]");
 const save=e.target.closest("[data-save]");
 if(save){
 const id=save.dataset.save;
-saved.has(id)?saved.delete(id):saved.add(id);
+
+const track = tracks.find(t => String(t.id) === id)
+  || savedTracks[id];
+
+if (saved.has(id)) {
+  saved.delete(id);
+  delete savedTracks[id];
+} else {
+  saved.add(id);
+  if (track) savedTracks[id] = track;
+}
+localStorage.setItem(
+  "freshspin-saved-tracks",
+  JSON.stringify(savedTracks)
+);
+
 localStorage.setItem("freshspin-saved",JSON.stringify([...saved]));
 render();
 }
 if(play){
-const t=tracks.find(x=>String(x.id)===play.dataset.play);
+
+const t=availableTracks.find(
+  x=>String(x.id)===play.dataset.play
+);
+
 if(!t||!safeURL(t.previewUrl))return;
 if(playing===String(t.id)){stop();render();return;}
 stop();
