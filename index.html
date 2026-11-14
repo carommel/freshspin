@@ -159,9 +159,11 @@ render();
 }
 if(play){
 
-const t=availableTracks.find(
-  x=>String(x.id)===play.dataset.play
-);
+
+const t = tracks.find(
+  x => String(x.id) === play.dataset.play
+) || savedTracks[play.dataset.play];
+
 
 if(!t||!safeURL(t.previewUrl))return;
 if(playing===String(t.id)){stop();render();return;}
