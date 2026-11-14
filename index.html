@@ -1,1 +1,169 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Fresh Spin</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#090909;color:white;font-family:Arial,sans-serif}
+header{position:sticky;top:0;background:#090909;padding:22px 16px;border-bottom:1px solid #333;z-index:2}
+main,header .inner{max-width:650px;margin:auto}
+h1{margin:0;font-size:29px;letter-spacing:-1px}
+.gold{color:#c8a45d}
+.subtitle{color:#aaa;font-size:12px;margin:8px 0 20px}
+nav{display:flex;gap:8px;overflow-x:auto;padding-bottom:8px}
+button{cursor:pointer;font:inherit}
+.tab{background:#222;color:white;border:1px solid #444;border-radius:30px;padding:10px 14px;white-space:nowrap}
+.tab.active{background:white;color:black}
+.filters{display:flex;gap:8px;margin-top:12px}
+input,select{background:#222;color:white;border:1px solid #444;padding:12px;border-radius:9px;min-width:0}
+input{flex:1}
+select{max-width:125px}
+main{padding:18px 16px}
+#status{font-size:12px;color:#aaa;margin-bottom:18px}
+.card{background:#171717;border:1px solid #333;border-radius:16px;overflow:hidden;margin-bottom:18px}
+.art{height:220px;background:#252525;display:flex;align-items:center;justify-content:center;font-size:70px}
+.art img{width:100%;height:100%;object-fit:cover}
+.info{padding:18px}
+.label{color:#c8a45d;font-size:11px;letter-spacing:1px;font-weight:bold}
+h2{margin:9px 0 5px;font-size:24px}
+.artist{color:#ccc}
+.desc{font-size:13px;color:#aaa;line-height:1.5}
+.actions{display:flex;gap:8px;margin-top:18px}
+.actions button,.actions a{padding:12px 10px;border-radius:9px;text-align:center;text-decoration:none;font-size:13px;font-weight:bold}
+.play{background:white;color:black;border:0;flex:1}
+.play:disabled{background:#444;color:#aaa}
+.secondary{background:#222;color:white;border:1px solid #555}
+footer{text-align:center;color:#888;font-size:12px;padding:30px}
+</style>
+</head>
+<body>
+<header>
+<div class="inner">
+<h1>FRESH SPIN<span class="gold">.</span></h1>
+<div class="subtitle">NEW SOUNDS. OLD FAVOURITES. GOOD FINDS.</div>
+<nav id="tabs">
+<button class="tab active" data-tab="all">All Music</button>
+<button class="tab" data-tab="new">Just Dropped</button>
+<button class="tab" data-tab="artist">New Artists</button>
+<button class="tab" data-tab="old">Rediscover</button>
+<button class="tab" data-tab="saved">♡ Saved</button>
+</nav>
+<div class="filters">
+<input id="search" placeholder="Search music..." aria-label="Search music">
+<select id="genre">
+<option value="all">All genres</option>
+<option>Soul</option>
+<option>R&B</option>
+<option>Funk</option>
+<option>Jazz</option>
+<option>Hip-hop</option>
+<option>Rap</option>
+</select>
+</div>
+</div>
+</header>
+<main>
+<div id="status">Loading music...</div>
+<div id="feed"></div>
+</main>
+<footer>Discover. Preview. Save. Repeat.</footer>
+<script>
+let tracks=[],tab="all",playing=null;
+const audio=new Audio();
+const $=id=>document.getElementById(id);
+let saved=new Set(JSON.parse(localStorage.getItem("freshspin-saved")||"[]"));
+
+function escapeHTML(s){
+return String(s??"").replace(/[&<>"']/g,c=>({
+"&":"&amp;","<":"&lt;",">":"&gt;",
+'"':"&quot;","'":"&#39;"
+})[c]);
+}
+function safeURL(s){
+try{
+const u=new URL(s);
+return u.protocol==="https:"?u.href:"";
+}catch{return "";}
+}
+function stop(){
+audio.pause();
+audio.removeAttribute("src");
+audio.load();
+playing=null;
+}
+function render(){
+const q=$("search").value.toLowerCase();
+const g=$("genre").value.toLowerCase();
+const filtered=tracks.filter(t=>
+(tab==="all"||(tab==="saved"?saved.has(String(t.id)):t.category===tab)) &&
+(g==="all"||t.genre.toLowerCase().includes(g)) &&
+(t.title+" "+t.artist).toLowerCase().includes(q)
+);
+$("status").textContent=filtered.length+" music discoveries";
+$("feed").innerHTML=filtered.map(t=>{
+const id=String(t.id);
+const preview=safeURL(t.previewUrl);
+const link=safeURL(t.listenUrl);
+return `<article class="card">
+<div class="art">${safeURL(t.artwork)?`<img src="${escapeHTML(safeURL(t.artwork))}" alt="Album artwork" loading="lazy">`:"♫"}</div>
+<div class="info">
+<div class="label">${escapeHTML(t.category==="old"?"REDISCOVER":t.category==="artist"?"ARTIST FIND":"JUST DROPPED")} · ${escapeHTML(t.genre)}</div>
+<h2>${escapeHTML(t.title)}</h2>
+<div class="artist">${escapeHTML(t.artist)}</div>
+<p class="desc">${escapeHTML(t.description||"A music discovery for your collection.")}</p>
+<div class="actions">
+<button class="play" data-play="${escapeHTML(id)}" ${preview?"":"disabled"}>${playing===id?"Ⅱ Pause":preview?"▶ Preview":"No preview"}</button>
+<a class="secondary" href="${escapeHTML(link||"#")}" target="_blank" rel="noopener noreferrer">Full ↗</a>
+<button class="secondary" data-save="${escapeHTML(id)}">${saved.has(id)?"♥ Saved":"♡ Save"}</button>
+</div>
+</div>
+</article>`;
+}).join("")||"<p>No discoveries found yet.</p>";
+}
+$("feed").addEventListener("click",async e=>{
+const play=e.target.closest("[data-play]");
+const save=e.target.closest("[data-save]");
+if(save){
+const id=save.dataset.save;
+saved.has(id)?saved.delete(id):saved.add(id);
+localStorage.setItem("freshspin-saved",JSON.stringify([...saved]));
+render();
+}
+if(play){
+const t=tracks.find(x=>String(x.id)===play.dataset.play);
+if(!t||!safeURL(t.previewUrl))return;
+if(playing===String(t.id)){stop();render();return;}
+stop();
+audio.src=safeURL(t.previewUrl);
+playing=String(t.id);
+render();
+try{await audio.play();}
+catch{stop();render();alert("Preview unavailable.");}
+}
+});
+audio.addEventListener("ended",()=>{playing=null;render();});
+document.querySelectorAll("[data-tab]").forEach(b=>{
+b.onclick=()=>{
+tab=b.dataset.tab;
+stop();
+document.querySelectorAll("[data-tab]").forEach(x=>x.classList.remove("active"));
+b.classList.add("active");
+render();
+};
+});
+$("search").oninput=render;
+$("genre").onchange=render;
+fetch("./data/feed.json")
+.then(r=>{if(!r.ok)throw Error("Feed unavailable");return r.json();})
+.then(data=>{tracks=data.items||[];render();})
+.catch(()=>{
+$("status").textContent="Music feed setup pending";
+$("feed").innerHTML="<p>The website is ready. We'll connect the music catalogue next.</p>";
+});
+</script>
+</body>
+</html>
+
