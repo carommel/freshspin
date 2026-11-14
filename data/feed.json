@@ -1,0 +1,60 @@
+
+{
+  "items": [
+    {
+      "id": "marvin-gaye-whats-going-on",
+      "title": "What's Going On",
+      "artist": "Marvin Gaye",
+      "genre": "Soul",
+      "category": "old",
+      "description": "1971 · A timeless soul classic.",
+      "artwork": "",
+      "previewUrl": "",
+      "listenUrl": "https://music.apple.com/ca/search?term=Marvin%20Gaye%20Whats%20Going%20On"
+    },
+    {
+      "id": "aaliyah-one-in-a-million",
+      "title": "One in a Million",
+      "artist": "Aaliyah",
+      "genre": "R&B",
+      "category": "old",
+      "description": "1996 · A defining sound of 90s R&B.",
+      "artwork": "",
+      "previewUrl": "",
+      "listenUrl": "https://music.apple.com/ca/search?term=Aaliyah%20One%20in%20a%20Million"
+    },
+    {
+      "id": "roy-ayers-everybody-loves",
+      "title": "Everybody Loves the Sunshine",
+      "artist": "Roy Ayers Ubiquity",
+      "genre": "Jazz",
+      "category": "old",
+      "description": "1976 · Warm jazz-funk for any afternoon.",
+      "artwork": "",
+      "previewUrl": "",
+      "listenUrl": "https://music.apple.com/ca/search?term=Roy%20Ayers%20Everybody%20Loves%20the%20Sunshine"
+    },
+    {
+      "id": "lauryn-hill-ex-factor",
+      "title": "Ex-Factor",
+      "artist": "Lauryn Hill",
+      "genre": "R&B",
+      "category": "old",
+      "description": "1998 · Soulful storytelling and unforgettable vocals.",
+      "artwork": "",
+      "previewUrl": "",
+      "listenUrl": "https://music.apple.com/ca/search?term=Lauryn%20Hill%20Ex%20Factor"
+    },
+    {
+      "id": "nas-ny-state-of-mind",
+      "title": "N.Y. State of Mind",
+      "artist": "Nas",
+      "genre": "Hip-hop",
+      "category": "old",
+      "description": "1994 · A landmark East Coast hip-hop recording.",
+      "artwork": "",
+      "previewUrl": "",
+      "listenUrl": "https://music.apple.com/ca/search?term=Nas%20NY%20State%20of%20Mind"
+    }
+  ]
+}
