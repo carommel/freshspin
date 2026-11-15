@@ -8,33 +8,55 @@ from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
 FEED = Path("data/feed.json")
+LIBRARY = Path("data/library.json")
+
 TODAY = datetime.now(timezone.utc)
 SEED = TODAY.strftime("%Y-%m-%d")
-randomizer = random.Random(SEED)
+RNG = random.Random(SEED)
+
+TARGETS = {"new": 5, "artist": 4, "old": 6}
 
 GENRES = {
-    "R&B": ["r&b", "rnb", "neo soul", "alternative r&b"],
+    "R&B": ["r&b", "rnb", "neo soul"],
     "Soul": ["soul", "modern soul"],
-    "Funk": ["funk", "funk soul"],
-    "Jazz": ["jazz", "jazz soul"],
+    "Funk": ["funk"],
+    "Jazz": ["jazz"],
     "Hip-hop": ["hip hop", "hip-hop", "boom bap"],
-    "Rap": ["rap", "underground rap"]
+    "Rap": ["rap"]
 }
 
 QUERIES = [
     "neo soul", "alternative r&b", "modern soul",
     "jazz soul", "funk", "hip hop", "underground rap",
     "contemporary r&b", "soul music", "jazz",
-    "independent soul", "alternative hip hop"
+    "independent soul", "alternative hip hop",
+    "rare soul", "jazz funk", "boogie",
+    "quiet storm", "deep soul", "classic funk",
+    "jazz rap", "independent r&b", "boom bap",
+    "1970s funk", "1980s soul", "1990s hip hop"
 ]
 
-def search(term, limit=100):
+def read_json(path, default):
+    if not path.exists():
+        return default
+    return json.loads(path.read_text(encoding="utf-8"))
+
+def write_json(path, data):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temp = path.with_suffix(".tmp")
+    temp.write_text(
+        json.dumps(data, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8"
+    )
+    temp.replace(path)
+
+def search(term):
     params = urllib.parse.urlencode({
         "term": term,
         "country": "ca",
         "media": "music",
         "entity": "song",
-        "limit": limit
+        "limit": 200
     })
     request = urllib.request.Request(
         "https://itunes.apple.com/search?" + params,
@@ -61,16 +83,20 @@ def release_date(song):
 def valid(song):
     return (
         song.get("kind") == "song"
-        and song.get("trackId")
-        and song.get("previewUrl", "").startswith("https://")
-        and song.get("artworkUrl100", "").startswith("https://")
-        and song.get("trackViewUrl", "").startswith("https://")
+        and song.get("trackId") is not None
+        and all(
+            str(song.get(field, "")).startswith("https://")
+            for field in (
+                "previewUrl",
+                "artworkUrl100",
+                "trackViewUrl"
+            )
+        )
         and genre_of(song) is not None
         and release_date(song) is not None
     )
 
 def make_item(song, category):
-    artwork = song["artworkUrl100"]
     return {
         "id": str(song["trackId"]),
         "title": song["trackName"],
@@ -81,96 +107,156 @@ def make_item(song, category):
             f"{release_date(song).year} · "
             + song.get("collectionName", "Music discovery")
         ),
-        "artwork": artwork.replace("100x100", "600x600"),
+        "artwork": song["artworkUrl100"].replace(
+            "100x100", "600x600"
+        ),
         "previewUrl": song["previewUrl"],
-        "listenUrl": song["trackViewUrl"]
+        "listenUrl": song["trackViewUrl"],
+        "added": SEED
     }
+if FEED.exists():
+    existing_feed = read_json(FEED, {})
+    if (
+        existing_feed.get("updated") == SEED
+        and LIBRARY.exists()
+    ):
+        print("Already updated today. No changes needed.")
+        raise SystemExit(0)
+previous = read_json(FEED, {"items": []})
+library_data = read_json(LIBRARY, {"items": []})
 
+# Preserve existing songs and their original categories.
+library = {}
+
+for item in library_data.get("items", []):
+    sid = str(item.get("id", ""))
+    if sid and item.get("category") in TARGETS:
+        library[sid] = dict(item)
+
+# Import the current feed into the permanent archive.
+# Keep existing metadata and original category.
+for item in previous.get("items", []):
+    sid = str(item.get("id", ""))
+    if not sid or item.get("category") not in TARGETS:
+        continue
+    if sid not in library:
+        archived = dict(item)
+        archived["added"] = previous.get("updated", SEED)
+        library[sid] = archived
+
+# Existing library IDs cannot be featured again.
+used_ids = set(library)
+used_artists = set()
+selected = []
+
+# Search Apple for candidate discoveries.
 pool = {}
 for term in QUERIES:
     try:
-        for song in search(term):
+        results = search(term)
+        for song in results:
             if valid(song):
                 pool[str(song["trackId"])] = song
-        print("Searched:", term)
+        print("Searched:", term, len(results))
     except Exception as error:
         print("Search failed:", term, error)
-    time.sleep(4)
+    time.sleep(3)
 
 songs = list(pool.values())
-randomizer.shuffle(songs)
-selected = []
-used_ids = set()
-used_artists = set()
+RNG.shuffle(songs)
 
-def add_from(candidates, category, limit=10):
+def choose(candidates, category, target):
     count = 0
     for song in candidates:
-        song_id = str(song["trackId"])
+        sid = str(song["trackId"])
         artist = song.get("artistName", "").lower()
-        if song_id in used_ids or artist in used_artists:
+
+        if sid in used_ids or artist in used_artists:
             continue
+
         selected.append(make_item(song, category))
-        used_ids.add(song_id)
+        used_ids.add(sid)
         used_artists.add(artist)
         count += 1
-        if count == limit:
+
+        if count >= target:
             break
-    print(category, count, "tracks selected")
+
+    print(category, "selected:", count)
+    return count
 
 recent = [
     s for s in songs
-    if TODAY - timedelta(days=90) <= release_date(s) <= TODAY
+    if 0 <= (TODAY - release_date(s)).days <= 120
 ]
-add_from(recent, "new")
 
-# Discovery candidates, not verified debut artists.
 artist_candidates = [
     s for s in songs
-    if TODAY - timedelta(days=730) <= release_date(s) <= TODAY
-    and str(s["trackId"]) not in used_ids
+    if 0 <= (TODAY - release_date(s)).days <= 730
 ]
-add_from(artist_candidates, "artist")
 
-# Catalogue dates can reflect reissues, not original releases.
 older = [
     s for s in songs
     if 1960 <= release_date(s).year <= 1999
 ]
-add_from(older, "old")
 
-# Retain previous Rediscover selections when discovery is short.
-previous = json.loads(FEED.read_text(encoding="utf-8"))
-old_count = sum(x["category"] == "old" for x in selected)
+# One exclusive category per song.
+# New Artists are recent discovery candidates,
+# not yet verified emerging artists.
+choose(artist_candidates, "artist", TARGETS["artist"])
+choose(recent, "new", TARGETS["new"])
+choose(older, "old", TARGETS["old"])
 
-for item in previous.get("items", []):
-    if old_count >= 10:
-        break
-    if item.get("category") != "old":
-        continue
-    if not item.get("previewUrl") or not item.get("artwork"):
-        continue
-    if str(item["id"]) in used_ids:
-        continue
-    selected.append(item)
-    used_ids.add(str(item["id"]))
-    old_count += 1
+# Publish partial daily selections when necessary.
+# Never replace the feed with an empty selection.
+if not selected:
+    print("No new qualifying tracks found.")
+    print("Keeping the previous daily feed.")
+else:
+    RNG.shuffle(selected)
 
-# Avoid publishing an empty or unusually small feed.
-if len(selected) < 15:
-    raise RuntimeError(
-        f"Only {len(selected)} tracks found; keeping existing feed"
-    )
+    for item in selected:
+        library[item["id"]] = item
 
-randomizer.shuffle(selected)
+    print("New discoveries:", len(selected))
 
-FEED.write_text(
-    json.dumps({
-        "updated": SEED,
-        "items": selected
-    }, indent=2, ensure_ascii=False) + "\n",
-    encoding="utf-8"
+# Keep all archived songs, newest first.
+all_items = sorted(
+    library.values(),
+    key=lambda item: (
+        item.get("added", ""),
+        str(item.get("id", ""))
+    ),
+    reverse=True
 )
 
-print("Published", len(selected), "discoveries")
+# Always save the permanent archive, including
+# imported songs from the previous feed.
+write_json(LIBRARY, {"items": all_items})
 
+if selected:
+    # Preserve today's selections if the updater
+    # runs a second time on the same UTC date.
+    if previous.get("updated") == SEED:
+        existing = previous.get("items", [])
+        existing_ids = {
+            str(item["id"]) for item in existing
+        }
+        new_items = [
+            item for item in selected
+            if str(item["id"]) not in existing_ids
+        ]
+        remaining = max(0, 15 - len(existing))
+        daily_items = existing + new_items[:remaining]
+    else:
+        daily_items = selected
+
+    write_json(FEED, {
+        "updated": SEED,
+        "items": daily_items
+    })
+
+    print("Today's featured tracks:", len(daily_items))
+
+print("Permanent library size:", len(all_items))
+print("Finished.")
