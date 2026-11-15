@@ -215,7 +215,25 @@ function render() {
     const preview = safeURL(t.previewUrl);
     const link = safeURL(t.listenUrl);
     const artwork = safeURL(t.artwork);
+const addedDate = String(t.added || "");
+const today = new Date().toLocaleDateString("en-CA", {
+  timeZone: "America/Toronto",
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit"
+});
 
+const dateLabel = addedDate
+  ? addedDate === today
+    ? "ADDED TODAY"
+    : "ADDED " + new Date(
+        addedDate + "T12:00:00"
+      ).toLocaleDateString("en-CA", {
+        month: "short",
+        day: "numeric",
+        year: "numeric"
+      }).toUpperCase()
+  : "";
     const categoryLabel =
       t.category === "old" ? "REDISCOVER" :
       t.category === "artist" ? "NEW ARTISTS" :
@@ -230,9 +248,14 @@ function render() {
       </div>
       <div class="info">
         <div class="label">
-          ${escapeHTML(categoryLabel)}
-          · ${escapeHTML(t.genre || "")}
-        </div>
+  ${escapeHTML(categoryLabel)}
+  · ${escapeHTML(t.genre || "")}
+  ${dateLabel
+    ? `<div style="margin-top:8px;color:#aaa">
+         ${escapeHTML(dateLabel)}
+       </div>`
+    : ""}
+</div>
         <h2>${escapeHTML(t.title)}</h2>
         <div class="artist">${escapeHTML(t.artist)}</div>
         <p class="desc">
