@@ -36,7 +36,12 @@ h2{margin:9px 0 5px;font-size:24px}
 .play{background:white;color:black;border:0;flex:1}
 .play:disabled{background:#444;color:#aaa}
 .secondary{background:#222;color:white;border:1px solid #555}
+#more{display:none;width:100%;padding:14px;border-radius:10px;background:#222;color:white;border:1px solid #555;margin:12px 0 24px}
 footer{text-align:center;color:#888;font-size:12px;padding:30px}
+@media(max-width:400px){
+.actions{gap:5px}
+.actions button,.actions a{font-size:12px;padding:11px 7px}
+}
 </style>
 </head>
 <body>
@@ -65,136 +70,321 @@ footer{text-align:center;color:#888;font-size:12px;padding:30px}
 </div>
 </div>
 </header>
+
 <main>
 <div id="status">Loading music...</div>
 <div id="feed"></div>
+<button id="more">Load More</button>
 </main>
+
 <footer>Discover. Preview. Save. Repeat.</footer>
+
 <script>
-let tracks=[],tab="all",playing=null;
-const audio=new Audio();
-const $=id=>document.getElementById(id);
-let saved=new Set(JSON.parse(localStorage.getItem("freshspin-saved")||"[]"));
+let tracks = [];
+let tab = "all";
+let playing = null;
+let visibleCount = 25;
+
+const PAGE_SIZE = 25;
+const ALL_LIMIT = 75;
+const audio = new Audio();
+const $ = id => document.getElementById(id);
+
+let saved = new Set(
+  JSON.parse(localStorage.getItem("freshspin-saved") || "[]")
+);
+
 let savedTracks = JSON.parse(
   localStorage.getItem("freshspin-saved-tracks") || "{}"
 );
 
-function escapeHTML(s){
-return String(s??"").replace(/[&<>"']/g,c=>({
-"&":"&amp;","<":"&lt;",">":"&gt;",
-'"':"&quot;","'":"&#39;"
-})[c]);
+function escapeHTML(s) {
+  return String(s ?? "").replace(/[&<>"']/g, c => ({
+    "&":"&amp;",
+    "<":"&lt;",
+    ">":"&gt;",
+    '"':"&quot;",
+    "'":"&#39;"
+  })[c]);
 }
-function safeURL(s){
-try{
-const u=new URL(s);
-return u.protocol==="https:"?u.href:"";
-}catch{return "";}
+
+function safeURL(s) {
+  try {
+    const u = new URL(s);
+    return u.protocol === "https:" ? u.href : "";
+  } catch {
+    return "";
+  }
 }
-function stop(){
-audio.pause();
-audio.removeAttribute("src");
-audio.load();
-playing=null;
+
+function stop() {
+  audio.pause();
+  audio.removeAttribute("src");
+  audio.load();
+  playing = null;
 }
-function render(){
-const q=$("search").value.toLowerCase();
-const g=$("genre").value.toLowerCase();
-const availableTracks = tab === "saved"
-  ? Object.values(savedTracks).concat(
-      tracks.filter(t => saved.has(String(t.id)) && !savedTracks[String(t.id)])
-    )
-  : tracks;
 
-const filtered=availableTracks.filter(t=>
-
-(tab==="all"||(tab==="saved"?saved.has(String(t.id)):t.category===tab)) &&
-(g==="all"||t.genre.toLowerCase().includes(g)) &&
-(t.title+" "+t.artist).toLowerCase().includes(q)
-);
-$("status").textContent=filtered.length+" music discoveries";
-$("feed").innerHTML=filtered.map(t=>{
-const id=String(t.id);
-const preview=safeURL(t.previewUrl);
-const link=safeURL(t.listenUrl);
-return `<article class="card">
-<div class="art">${safeURL(t.artwork)?`<img src="${escapeHTML(safeURL(t.artwork))}" alt="Album artwork" loading="lazy">`:"♫"}</div>
-<div class="info">
-<div class="label">${escapeHTML(t.category==="old"?"REDISCOVER":t.category==="artist"?"ARTIST FIND":"JUST DROPPED")} · ${escapeHTML(t.genre)}</div>
-<h2>${escapeHTML(t.title)}</h2>
-<div class="artist">${escapeHTML(t.artist)}</div>
-<p class="desc">${escapeHTML(t.description||"A music discovery for your collection.")}</p>
-<div class="actions">
-<button class="play" data-play="${escapeHTML(id)}" ${preview?"":"disabled"}>${playing===id?"Ⅱ Pause":preview?"▶ Preview":"No preview"}</button>
-<a class="secondary" href="${escapeHTML(link||"#")}" target="_blank" rel="noopener noreferrer">Full ↗</a>
-<button class="secondary" data-save="${escapeHTML(id)}">${saved.has(id)?"♥ Saved":"♡ Save"}</button>
-</div>
-</div>
-</article>`;
-}).join("")||"<p>No discoveries found yet.</p>";
+function trackId(t) {
+  return String(t.id);
 }
-$("feed").addEventListener("click",async e=>{
-const play=e.target.closest("[data-play]");
-const save=e.target.closest("[data-save]");
-if(save){
-const id=save.dataset.save;
 
-const track = tracks.find(t => String(t.id) === id)
-  || savedTracks[id];
-
-if (saved.has(id)) {
-  saved.delete(id);
-  delete savedTracks[id];
-} else {
-  saved.add(id);
-  if (track) savedTracks[id] = track;
+// A stable sort key mixes tracks within each date,
+// while keeping newer dates ahead of older dates.
+function mixKey(t) {
+  const value = String(t.added || "") + ":" + trackId(t);
+  let hash = 2166136261;
+  for (let i = 0; i < value.length; i++) {
+    hash ^= value.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  return hash >>> 0;
 }
-localStorage.setItem(
-  "freshspin-saved-tracks",
-  JSON.stringify(savedTracks)
-);
 
-localStorage.setItem("freshspin-saved",JSON.stringify([...saved]));
-render();
+function newestFirst(a, b) {
+  const dateA = String(a.added || "");
+  const dateB = String(b.added || "");
+
+  if (dateA !== dateB) {
+    return dateA < dateB ? 1 : -1;
+  }
+
+  return mixKey(a) - mixKey(b) ||
+    trackId(a).localeCompare(trackId(b));
 }
-if(play){
 
-
-const t = tracks.find(
-  x => String(x.id) === play.dataset.play
-) || savedTracks[play.dataset.play];
-
-
-if(!t||!safeURL(t.previewUrl))return;
-if(playing===String(t.id)){stop();render();return;}
-stop();
-audio.src=safeURL(t.previewUrl);
-playing=String(t.id);
-render();
-try{await audio.play();}
-catch{stop();render();alert("Preview unavailable.");}
+function getTrack(id) {
+  return tracks.find(t => trackId(t) === id) ||
+    savedTracks[id];
 }
+
+function getAvailableTracks() {
+  if (tab === "saved") {
+    const combined = new Map();
+
+    Object.values(savedTracks).forEach(t => {
+      if (t && t.id != null && saved.has(trackId(t))) {
+        combined.set(trackId(t), t);
+      }
+    });
+
+    tracks.forEach(t => {
+      if (saved.has(trackId(t))) {
+        combined.set(trackId(t), t);
+      }
+    });
+
+    return [...combined.values()].sort(newestFirst);
+  }
+
+  if (tab === "all") {
+    return tracks.slice(0, ALL_LIMIT);
+  }
+
+  return tracks.filter(t => t.category === tab);
+}
+
+function render() {
+  const q = $("search").value.trim().toLowerCase();
+  const g = $("genre").value.toLowerCase();
+
+  const filtered = getAvailableTracks().filter(t => {
+    const genre = String(t.genre || "").toLowerCase();
+    const searchable = (
+      String(t.title || "") + " " +
+      String(t.artist || "") + " " +
+      String(t.description || "")
+    ).toLowerCase();
+
+    return (
+      (g === "all" || genre.includes(g)) &&
+      searchable.includes(q)
+    );
+  });
+
+  const shown = filtered.slice(0, visibleCount);
+
+  $("status").textContent =
+    filtered.length + " music discoveries" +
+    (tab === "all" ? " · latest 75" : "") +
+    (filtered.length > shown.length
+      ? " · showing " + shown.length
+      : "");
+
+  $("feed").innerHTML = shown.map(t => {
+    const id = trackId(t);
+    const preview = safeURL(t.previewUrl);
+    const link = safeURL(t.listenUrl);
+    const artwork = safeURL(t.artwork);
+
+    const categoryLabel =
+      t.category === "old" ? "REDISCOVER" :
+      t.category === "artist" ? "NEW ARTISTS" :
+      "JUST DROPPED";
+
+    return `<article class="card">
+      <div class="art">
+        ${artwork
+          ? `<img src="${escapeHTML(artwork)}"
+               alt="Album artwork" loading="lazy">`
+          : "♫"}
+      </div>
+      <div class="info">
+        <div class="label">
+          ${escapeHTML(categoryLabel)}
+          · ${escapeHTML(t.genre || "")}
+        </div>
+        <h2>${escapeHTML(t.title)}</h2>
+        <div class="artist">${escapeHTML(t.artist)}</div>
+        <p class="desc">
+          ${escapeHTML(t.description ||
+            "A music discovery for your collection.")}
+          ${t.added
+            ? `<span> · Featured ${escapeHTML(t.added)}</span>`
+            : ""}
+        </p>
+        <div class="actions">
+          <button class="play"
+            data-play="${escapeHTML(id)}"
+            ${preview ? "" : "disabled"}>
+            ${playing === id
+              ? "Ⅱ Pause"
+              : preview ? "▶ Preview" : "No preview"}
+          </button>
+          <a class="secondary"
+             href="${escapeHTML(link || "#")}"
+             target="_blank"
+             rel="noopener noreferrer">
+             Full ↗
+          </a>
+          <button class="secondary"
+             data-save="${escapeHTML(id)}">
+             ${saved.has(id) ? "♥ Saved" : "♡ Save"}
+          </button>
+        </div>
+      </div>
+    </article>`;
+  }).join("") || "<p>No discoveries found yet.</p>";
+
+  $("more").style.display =
+    filtered.length > visibleCount ? "block" : "none";
+}
+
+$("feed").addEventListener("click", async e => {
+  const play = e.target.closest("[data-play]");
+  const save = e.target.closest("[data-save]");
+
+  if (save) {
+    const id = save.dataset.save;
+    const track = getTrack(id);
+
+    if (saved.has(id)) {
+      saved.delete(id);
+      delete savedTracks[id];
+    } else {
+      saved.add(id);
+      if (track) savedTracks[id] = track;
+    }
+
+    localStorage.setItem(
+      "freshspin-saved",
+      JSON.stringify([...saved])
+    );
+
+    localStorage.setItem(
+      "freshspin-saved-tracks",
+      JSON.stringify(savedTracks)
+    );
+
+    render();
+    return;
+  }
+
+  if (play) {
+    const id = play.dataset.play;
+    const t = getTrack(id);
+
+    if (!t || !safeURL(t.previewUrl)) return;
+
+    if (playing === id) {
+      stop();
+      render();
+      return;
+    }
+
+    stop();
+    audio.src = safeURL(t.previewUrl);
+    playing = id;
+    render();
+
+    try {
+      await audio.play();
+    } catch {
+      stop();
+      render();
+      alert("Preview unavailable.");
+    }
+  }
 });
-audio.addEventListener("ended",()=>{playing=null;render();});
-document.querySelectorAll("[data-tab]").forEach(b=>{
-b.onclick=()=>{
-tab=b.dataset.tab;
-stop();
-document.querySelectorAll("[data-tab]").forEach(x=>x.classList.remove("active"));
-b.classList.add("active");
-render();
+
+audio.addEventListener("ended", () => {
+  playing = null;
+  render();
+});
+
+document.querySelectorAll("[data-tab]").forEach(b => {
+  b.onclick = () => {
+    tab = b.dataset.tab;
+    visibleCount = PAGE_SIZE;
+    stop();
+
+    document.querySelectorAll("[data-tab]").forEach(x => {
+      x.classList.remove("active");
+    });
+
+    b.classList.add("active");
+    render();
+  };
+});
+
+$("search").oninput = () => {
+  visibleCount = PAGE_SIZE;
+  render();
 };
-});
-$("search").oninput=render;
-$("genre").onchange=render;
-fetch("./data/feed.json")
-.then(r=>{if(!r.ok)throw Error("Feed unavailable");return r.json();})
-.then(data=>{tracks=data.items||[];render();})
-.catch(()=>{
-$("status").textContent="Music feed setup pending";
-$("feed").innerHTML="<p>The website is ready. We'll connect the music catalogue next.</p>";
-});
+
+$("genre").onchange = () => {
+  visibleCount = PAGE_SIZE;
+  render();
+};
+
+$("more").onclick = () => {
+  visibleCount += PAGE_SIZE;
+  render();
+};
+
+// The permanent archive is now the main music source.
+fetch("./data/library.json")
+  .then(r => {
+    if (!r.ok) throw Error("Library unavailable");
+    return r.json();
+  })
+  .then(data => {
+    const unique = new Map();
+
+    (data.items || []).forEach(t => {
+      if (t && t.id != null) {
+        unique.set(trackId(t), t);
+      }
+    });
+
+    tracks = [...unique.values()].sort(newestFirst);
+    render();
+  })
+  .catch(error => {
+    console.error(error);
+    $("status").textContent = "Music library unavailable";
+    $("feed").innerHTML =
+      "<p>We couldn't load the music library. Please try again later.</p>";
+  });
 </script>
 </body>
 </html>
-
