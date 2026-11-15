@@ -32,16 +32,19 @@ main{padding:18px 16px}
   display:flex;
   justify-content:space-between;
   align-items:flex-start;
-  gap:12px;
+  gap:8px;
+}
+
+.card-meta .label{
+  min-width:0;
 }
 .date-added{
   color:#aaa;
   font-size:10px;
   font-weight:bold;
-  letter-spacing:.5px;
+  letter-spacing:0;
   text-align:right;
-  white-space:normal;
-  max-width:110px;
+  white-space:nowrap;
   flex-shrink:0;
 }
   h2{margin:9px 0 5px;font-size:24px}
@@ -281,9 +284,6 @@ const dateLabel = addedDate
         <p class="desc">
           ${escapeHTML(t.description ||
             "A music discovery for your collection.")}
-          ${t.added
-            ? `<span> · Featured ${escapeHTML(t.added)}</span>`
-            : ""}
         </p>
         <div class="actions">
           <button class="play"
