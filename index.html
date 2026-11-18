@@ -524,11 +524,13 @@ footer{text-align:center;color:#888;font-size:12px;padding:30px}
     </svg>
   </button>
 
- <button type="button" class="header-icon" id="savedIcon" aria-label="Saved favourites" onclick="document.querySelector('[data-tab=saved]').click()">
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M20.8 8.6c0 4.2-8.8 10.2-8.8 10.2S3.2 12.8 3.2 8.6a4.7 4.7 0 0 1 8.8-2.2 4.7 4.7 0 0 1 8.8 2.2Z"></path>
-    </svg>
-  </button>
+ 
+<button type="button" class="header-icon" id="savedIcon" aria-label="Saved favourites" onclick="document.querySelector('[data-tab=saved]').click()">
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+  </svg>
+</button>
+
 
  <button type="button" class="header-icon" id="genreIcon" aria-label="Browse genres" aria-controls="genrePopup" aria-expanded="false" onclick="const popup=document.getElementById('genrePopup'); const opening=!popup.classList.contains('open'); popup.classList.toggle('open',opening); this.setAttribute('aria-expanded',String(opening)); document.getElementById('headerFilters').classList.remove('open'); if(opening)document.getElementById('genre').focus();">
     <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -542,7 +544,17 @@ footer{text-align:center;color:#888;font-size:12px;padding:30px}
 <button class="tab" data-tab="new">Just Dropped</button>
 <button class="tab" data-tab="artist">New Artists</button>
 <button class="tab" data-tab="old">Rediscover</button>
-<button class="tab" data-tab="saved">♡ Saved</button>
+
+<button class="tab" data-tab="saved">
+  <svg viewBox="0 0 24 24" width="14" height="14"
+       fill="none" stroke="currentColor" stroke-width="2"
+       stroke-linecap="round" stroke-linejoin="round"
+       aria-hidden="true" style="vertical-align:-2px">
+    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+  </svg>
+  Saved
+</button>
+
 </nav>
   
 <div class="daily-update-bar">
