@@ -4,19 +4,43 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Fresh Spin</title>
+<title>RECS N’ EFFECT</title>
 <style>
 *{box-sizing:border-box}
 body{margin:0;background:#090909;color:white;font-family:Arial,sans-serif}
-header{position:sticky;top:0;background:#090909;padding:22px 16px;border-bottom:1px solid #333;z-index:2}
+header{position:sticky;top:0;background:#FAF7F0;color:#171717;padding:22px 16px;border-bottom:1px solid #D8CDBB;z-index:2}
 main,header .inner{max-width:650px;margin:auto}
 h1{margin:0;font-size:29px;letter-spacing:-1px}
-.gold{color:#c8a45d}
-.subtitle{color:#aaa;font-size:12px;margin:8px 0 20px}
+@media(max-width:600px){
+  header{padding:14px 16px}
+  .brand-logo{font-size:27px;margin-bottom:8px}
+  .subtitle{font-size:10px;margin:6px 0 14px}
+}
+  .gold{color:#c8a45d}
+  .brand-logo{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  font-size:32px;
+  font-weight:900;
+  line-height:0.95;
+  letter-spacing:-1.5px;
+  color:#171717;
+  margin:0 0 12px;
+}
+
+.brand-logo > span{
+  display:block;
+}
+
+.brand-logo .gold{
+  color:#c8a45d;
+}
+.subtitle{color:#555;font-size:12px;letter-spacing:1px;margin:8px 0 20px}
 nav{display:flex;gap:8px;overflow-x:auto;padding-bottom:8px}
 button{cursor:pointer;font:inherit}
-.tab{background:#222;color:white;border:1px solid #444;border-radius:30px;padding:10px 14px;white-space:nowrap}
-.tab.active{background:white;color:black}
+.tab{background:#171717;color:#FAF7F0;border:1px solid #171717;border-radius:30px;padding:10px 14px;white-space:nowrap}
+.tab.active{background:#c8a45d;color:#171717;border-color:#c8a45d}
 .filters{display:flex;gap:8px;margin-top:12px}
 input,select{background:#222;color:white;border:1px solid #444;padding:12px;border-radius:9px;min-width:0}
 input{flex:1}
@@ -154,8 +178,12 @@ footer{text-align:center;color:#888;font-size:12px;padding:30px}
 <body>
 <header>
 <div class="inner">
-<h1>FRESH SPIN<span class="gold">.</span></h1>
-<div class="subtitle">NEW SOUNDS. OLD FAVOURITES. GOOD FINDS.</div>
+<h1 class="brand-logo">
+  <span>RECS</span>
+  <span>N’</span>
+  <span>EFFECT<span class="gold">.</span></span>
+</h1>
+<div class="subtitle">FRESH FINDS. TIMELESS SOUNDS.</div>
 <nav id="tabs">
 <button class="tab active" data-tab="all">All Music</button>
 <button class="tab" data-tab="new">Just Dropped</button>
