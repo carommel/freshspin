@@ -459,6 +459,9 @@ footer{text-align:center;color:#888;font-size:12px;padding:30px}
 .refresh-music-btn.refreshing {
   font-size: 0;
 }
+  .refresh-music-btn.refreshing svg {
+  visibility: hidden;
+}
 .refresh-music-btn.refreshing::after {
   content: "";
   position: absolute;
@@ -553,10 +556,20 @@ footer{text-align:center;color:#888;font-size:12px;padding:30px}
 
   <div class="latest-music">
     <span>Latest Music</span>
-    <button id="refreshMusic" class="refresh-music-btn"
-            type="button" aria-label="Refresh latest music">
-      ↻
-    </button>
+    
+<button id="refreshMusic" class="refresh-music-btn"
+        type="button" aria-label="Refresh latest music">
+  <svg viewBox="0 0 24 24" width="19" height="19"
+       fill="none" stroke="currentColor"
+       stroke-width="2" stroke-linecap="round"
+       stroke-linejoin="round" aria-hidden="true">
+    <path d="M3 11a9 9 0 0 1 15.36-6.36L21 7"/>
+    <path d="M21 3v4h-4"/>
+    <path d="M21 13a9 9 0 0 1-15.36 6.36L3 17"/>
+    <path d="M3 21v-4h4"/>
+  </svg>
+</button>
+
   </div>
 </div>
 
