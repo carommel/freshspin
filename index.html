@@ -352,7 +352,7 @@ footer{text-align:center;color:#888;font-size:12px;padding:30px}
     <div class="subtitle">FRESH FINDS. TIMELESS SOUNDS.</div>
   </div>
   <div class="header-icons">
-  <button type="button" class="header-icon" id="searchIcon" aria-label="Search music" onclick="const panel=document.getElementById('headerFilters'); const search=document.getElementById('search'); const genre=document.getElementById('genre'); const opening=!panel.classList.contains('open') || search.style.display==='none'; panel.classList.toggle('open',opening); search.style.display=opening?'block':'none'; genre.style.display='none'; if(opening)search.focus();"> aria-label="Search music" onclick="const panel=document.getElementById('headerFilters'); const opening=!panel.classList.contains('open'); panel.classList.toggle('open',opening); if(opening)document.getElementById('search').focus();">
+  <button type="button" class="header-icon" id="searchIcon" aria-label="Search music" onclick="const panel=document.getElementById('headerFilters'); const search=document.getElementById('search'); const genre=document.getElementById('genre'); const opening=!panel.classList.contains('open') || search.style.display==='none'; panel.classList.toggle('open',opening); search.style.display=opening?'block':'none'; genre.style.display='none'; if(opening)search.focus();">
     <svg viewBox="0 0 24 24" aria-hidden="true">
       <circle cx="10.5" cy="10.5" r="6.5"></circle>
       <path d="M15.5 15.5L21 21"></path>
@@ -365,7 +365,7 @@ footer{text-align:center;color:#888;font-size:12px;padding:30px}
     </svg>
   </button>
 
- <button type="button" class="header-icon" <button type="button" class="header-icon" id="genreIcon" aria-label="Browse genres" onclick="const panel=document.getElementById('headerFilters'); const search=document.getElementById('search'); const genre=document.getElementById('genre'); const opening=!panel.classList.contains('open') || genre.style.display==='none'; panel.classList.toggle('open',opening); search.style.display='none'; genre.style.display=opening?'block':'none'; if(opening)genre.focus();"> aria-label="Browse genres" onclick="const panel=document.getElementById('headerFilters'); panel.classList.add('open'); document.getElementById('search').style.display='none'; document.getElementById('genre').style.display='block'; document.getElementById('genre').focus()">
+ <button type="button" class="header-icon" id="genreIcon" aria-label="Browse genres" onclick="const panel=document.getElementById('headerFilters'); const search=document.getElementById('search'); const genre=document.getElementById('genre'); const opening=!panel.classList.contains('open') || genre.style.display==='none'; panel.classList.toggle('open',opening); search.style.display='none'; genre.style.display=opening?'block':'none'; if(opening)genre.focus();">
     <svg viewBox="0 0 24 24" aria-hidden="true">
       <path d="M3 6h18M3 12h18M3 18h18"></path>
     </svg>
