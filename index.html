@@ -380,6 +380,75 @@ footer{text-align:center;color:#888;font-size:12px;padding:30px}
 .actions{gap:5px}
 .actions button,.actions a{font-size:12px;padding:11px 7px}
 }
+  
+/* Daily update and refresh row */
+.daily-update-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: #111;
+  color: #f5f5f5;
+  padding: 12px 14px;
+  border-bottom: 1px solid #292929;
+}
+
+.daily-update-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.daily-update-title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.daily-update-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #c8a45d;
+  flex-shrink: 0;
+}
+
+.daily-update-date {
+  font-size: 10px;
+  color: #999;
+}
+
+.latest-music {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  white-space: nowrap;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.refresh-music-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid #c8a45d;
+  background: #242424;
+  color: #c8a45d;
+  font-size: 23px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.refresh-music-btn:active {
+  background: #392b1b;
+}
+
 </style>
 </head>
 <body>
@@ -435,6 +504,25 @@ footer{text-align:center;color:#888;font-size:12px;padding:30px}
 <button class="tab" data-tab="old">Rediscover</button>
 <button class="tab" data-tab="saved">♡ Saved</button>
 </nav>
+  
+<div class="daily-update-bar">
+  <div class="daily-update-info">
+    <div class="daily-update-title">
+      <span class="daily-update-dot"></span>
+      <span>UPDATED DAILY</span>
+    </div>
+    <span id="lastUpdated" class="daily-update-date"></span>
+  </div>
+
+  <div class="latest-music">
+    <span>Latest Music</span>
+    <button id="refreshMusic" class="refresh-music-btn"
+            type="button" aria-label="Refresh latest music">
+      ↻
+    </button>
+  </div>
+</div>
+
 <div class="filters" id="headerFilters">
 <input id="search" placeholder="Search music..." aria-label="Search music">
 </div>
