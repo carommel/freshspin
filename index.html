@@ -20,7 +20,9 @@ header{
 main,header .inner{max-width:650px;margin:auto}
 h1{margin:0;font-size:29px;letter-spacing:-1px}
 @media(max-width:600px){
-  header{padding:30px 16px 12px}
+  header{
+  padding:30px 16px 0;
+}
   .brand-logo{font-size:27px;margin-bottom:8px}
   .subtitle{font-size:10px;margin:6px 0 14px}
 }
@@ -40,9 +42,9 @@ h1{margin:0;font-size:29px;letter-spacing:-1px}
 }
 
 .header-brand .brand-logo{
-  font-size:24px;
+  font-size:28px;
   line-height:0.95;
-  letter-spacing:1px;
+  letter-spacing:-1px;
   margin:0;
   flex-shrink:0;
 }
@@ -107,8 +109,8 @@ h1{margin:0;font-size:29px;letter-spacing:-1px}
 }
 
 .header-icon svg{
-  width:22px;
-  height:22px;
+  width:26px;
+  height:26px;
   fill:none;
   stroke:currentColor;
   stroke-width:1.8;
@@ -158,10 +160,11 @@ header:has(#headerFilters.open) {
   gap:12px;
 }
 
-  .header-brand .brand-logo{
-    font-size:19px;
-    letter-spacing:-0.5px;
-  }
+.header-brand .brand-logo{
+  font-size:28px;
+  letter-spacing:-1px;
+  line-height:0.95;
+}
 
 .header-brand .subtitle{
   font-size:12px;
@@ -172,8 +175,9 @@ header:has(#headerFilters.open) {
 }
 
   .header-icons{
-    gap:2px;
-  }
+  gap:5px;
+  padding-right:8px;
+}
 
   .header-icon{
     padding:3px;
@@ -244,7 +248,7 @@ button{cursor:pointer;font:inherit}
   color:#c8a45d;
   border-bottom-color:#c8a45d;
 }
-.filters{display:flex;gap:8px;margin-top:12px}
+.filters{display:flex;gap:8px;margin-top:0}
 input,select{background:#222;color:white;border:1px solid #444;padding:12px;border-radius:9px;min-width:0}
 input{flex:1}
 select{max-width:125px}
