@@ -618,29 +618,57 @@ async function initializeLikesUser() {
     return;
   }
 
-  if (session) {
-    console.log("Existing Likes session restored");
-    return;
-  }
+  
+if (session) {
+  console.log("Existing Likes session restored");
+  await loadLikedSongs();
+  return;
+}
+
 
   const { error: signInError } =
     await supabaseClient.auth.signInAnonymously();
 
   if (signInError) {
     console.error("Anonymous sign-in failed:", signInError.message);
-  } else {
-    console.log("New Likes session created");
-  }
+ 
+} else {
+  console.log("New Likes session created");
+  await loadLikedSongs();
 }
 
-initializeLikesUser();
+}
+
+async function loadLikedSongs() {
+  const { data: { user }, error: userError } =
+    await supabaseClient.auth.getUser();
+
+  if (userError || !user) return;
+
+  const { data, error } = await supabaseClient
+    .from("song_likes")
+    .select("song_id")
+    .eq("visitor_id", user.id);
+
+  if (error) {
+    console.error("Could not load Likes:", error);
+    return;
+  }
+
+  likedSongs = new Set(data.map(row => row.song_id));
+  render();
+}
+
+
 
 
 
 let tracks = [];
 let tab = "all";
 let playing = null;
-let visibleCount = 25;
+let visibleCount = 25; 
+let likedSongs = new Set();
+
 
 const PAGE_SIZE = 25;
 const ALL_LIMIT = 75;
@@ -897,23 +925,26 @@ const dateLabel = addedDate
      </svg> Save`}
           </button>
           
+
 <button class="secondary like-btn"
         type="button"
         data-like="${escapeHTML(id)}"
-        aria-label="Like this song">
+        aria-label="${likedSongs.has(id) ? 'Unlike this song' : 'Like this song'}"
+        aria-pressed="${likedSongs.has(id)}">
 
   <svg width="17" height="17"
        viewBox="0 0 24 24"
-       fill="none"
-       stroke="white"
+       fill="${likedSongs.has(id) ? '#c8a45d' : 'none'}"
+       stroke="${likedSongs.has(id) ? '#c8a45d' : 'white'}"
        stroke-width="2"
        stroke-linecap="round"
        stroke-linejoin="round"
        aria-hidden="true">
     <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78Z"/>
   </svg>
-  Like
+  ${likedSongs.has(id) ? 'Liked' : 'Like'}
 </button>
+
         </div>
       </div>
     </article>`;
@@ -989,24 +1020,38 @@ $("feed").addEventListener("click", async e => {
       return;
     }
 
-    if (existing) {
-      const { error } = await supabaseClient
-        .from("song_likes")
-        .delete()
-        .eq("song_id", id)
-        .eq("visitor_id", user.id);
+   
+if (existing) {
+  const { error } = await supabaseClient
+    .from("song_likes")
+    .delete()
+    .eq("song_id", id)
+    .eq("visitor_id", user.id);
 
-      if (error) console.error("Unlike failed:", error);
-    } else {
-      const { error } = await supabaseClient
-        .from("song_likes")
-        .insert({
-          song_id: id,
-          visitor_id: user.id
-        });
+  if (error) {
+    console.error("Unlike failed:", error);
+    return;
+  }
 
-      if (error) console.error("Like failed:", error);
-    }
+  likedSongs.delete(id);
+} else {
+  const { error } = await supabaseClient
+    .from("song_likes")
+    .insert({
+      song_id: id,
+      visitor_id: user.id
+    });
+
+  if (error) {
+    console.error("Like failed:", error);
+    return;
+  }
+
+  likedSongs.add(id);
+}
+
+render();
+
 
     return;
   }
@@ -1183,7 +1228,7 @@ $("refreshMusic").addEventListener("click", async () => {
 button.classList.remove("refreshing");
   }
 });
-
+initializeLikesUser();
 </script>
   
 
