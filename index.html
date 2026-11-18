@@ -611,13 +611,32 @@ const supabaseClient = window.supabase.createClient(
   
 
 supabaseClient.auth.signInAnonymously()
-  .then(({ data, error }) => {
-    if (error) {
-      console.error("Anonymous sign-in failed:", error.message);
-    } else {
-      console.log("Anonymous sign-in successful");
-    }
-  });
+  .
+async function initializeLikesUser() {
+  const { data: { session }, error } =
+    await supabaseClient.auth.getSession();
+
+  if (error) {
+    console.error("Session check failed:", error.message);
+    return;
+  }
+
+  if (session) {
+    console.log("Existing Likes session restored");
+    return;
+  }
+
+  const { error: signInError } =
+    await supabaseClient.auth.signInAnonymously();
+
+  if (signInError) {
+    console.error("Anonymous sign-in failed:", signInError.message);
+  } else {
+    console.log("New Likes session created");
+  }
+}
+
+initializeLikesUser();
 
 
 
