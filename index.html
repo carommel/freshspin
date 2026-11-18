@@ -387,6 +387,7 @@ footer{text-align:center;color:#888;font-size:12px;padding:30px}
   align-items: center;
   justify-content: space-between;
   gap: 10px;
+  margin: 0 -16px;
   background: #111;
   color: #f5f5f5;
   padding: 12px 14px;
@@ -1052,7 +1053,8 @@ $("refreshMusic").addEventListener("click", async () => {
     alert("Couldn't refresh music. Please try again.");
   } finally {
     button.disabled = false;
-    button.classList.remove("refreshing");
+    await new Promise(resolve => setTimeout(resolve, 1000));
+button.classList.remove("refreshing");
   }
 });
 
