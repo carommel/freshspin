@@ -896,11 +896,12 @@ const dateLabel = addedDate
        <path d="M6 3h12a1 1 0 0 1 1 1v17l-7-5-7 5V4a1 1 0 0 1 1-1z"/>
      </svg> Save`}
           </button>
-          <button class="secondary like-btn"
+          
+<button class="secondary like-btn"
         type="button"
-        disabled
-        title="Likes coming soon"
-        aria-label="Like feature coming soon">
+        data-like="${escapeHTML(id)}"
+        aria-label="Like this song">
+
   <svg width="17" height="17"
        viewBox="0 0 24 24"
        fill="none"
@@ -961,6 +962,55 @@ $("feed").addEventListener("click", async e => {
     render();
     return;
   }
+
+  const like = e.target.closest("[data-like]");
+
+  if (like) {
+    const id = like.dataset.like;
+
+    const { data: { user }, error: userError } =
+      await supabaseClient.auth.getUser();
+
+    if (userError || !user) {
+      alert("Likes are temporarily unavailable.");
+      return;
+    }
+
+    const { data: existing, error: checkError } =
+      await supabaseClient
+        .from("song_likes")
+        .select("id")
+        .eq("song_id", id)
+        .eq("visitor_id", user.id)
+        .maybeSingle();
+
+    if (checkError) {
+      console.error("Like check failed:", checkError);
+      return;
+    }
+
+    if (existing) {
+      const { error } = await supabaseClient
+        .from("song_likes")
+        .delete()
+        .eq("song_id", id)
+        .eq("visitor_id", user.id);
+
+      if (error) console.error("Unlike failed:", error);
+    } else {
+      const { error } = await supabaseClient
+        .from("song_likes")
+        .insert({
+          song_id: id,
+          visitor_id: user.id
+        });
+
+      if (error) console.error("Like failed:", error);
+    }
+
+    return;
+  }
+
 
   if (play) {
     const id = play.dataset.play;
