@@ -598,8 +598,17 @@ footer{text-align:center;color:#888;font-size:12px;padding:30px}
 </main>
 
 <footer>Discover. Preview. Save. Repeat.</footer>
-
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
+  
+const SUPABASE_URL = "https://nkjidxgiitiguesrtyvy.supabase.co/rest/v1/";
+const SUPABASE_KEY = "sb_publishable_Y2cGsUko_JfYDIMkBfBBIQ_hNtA5tO5";
+
+const supabaseClient = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
 let tracks = [];
 let tab = "all";
 let playing = null;
@@ -1098,5 +1107,8 @@ button.classList.remove("refreshing");
 });
 
 </script>
+  
+
+
 </body>
 </html>
