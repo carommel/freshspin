@@ -609,9 +609,6 @@ const supabaseClient = window.supabase.createClient(
   SUPABASE_KEY
 );
   
-
-supabaseClient.auth.signInAnonymously()
-  .
 async function initializeLikesUser() {
   const { data: { session }, error } =
     await supabaseClient.auth.getSession();
