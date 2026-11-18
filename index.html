@@ -449,6 +449,28 @@ footer{text-align:center;color:#888;font-size:12px;padding:30px}
   background: #392b1b;
 }
 
+/* Refresh button loading animation */
+.refresh-music-btn.refreshing {
+  animation: musicRefreshSpin 0.8s linear infinite;
+  opacity: 0.65;
+  cursor: wait;
+}
+
+@keyframes musicRefreshSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .refresh-music-btn.refreshing {
+    animation: none;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -949,6 +971,91 @@ fetch("./data/library.json")
     $("feed").innerHTML =
       "<p>We couldn't load the music library. Please try again later.</p>";
   });
+  
+fetch("./data/feed.json")
+  .then(r => {
+    if (!r.ok) throw Error("Update date unavailable");
+    return r.json();
+  })
+  .then(data => {
+    if (!data.updated) return;
+
+    const date = new Date(data.updated + "T12:00:00");
+
+    if (Number.isNaN(date.getTime())) return;
+
+    const formatted = date.toLocaleDateString("en-CA", {
+      month: "short",
+      day: "numeric",
+      year: "numeric"
+    });
+
+    $("lastUpdated").textContent = "Last updated: " + formatted;
+  })
+  .catch(error => {
+    console.error("Could not load update date:", error);
+  });
+
+$("refreshMusic").addEventListener("click", async () => {
+  const button = $("refreshMusic");
+
+  if (button.disabled) return;
+
+  button.disabled = true;
+  button.classList.add("refreshing");
+
+  try {
+    const response = await fetch(
+      "./data/library.json?t=" + Date.now(),
+      { cache: "no-store" }
+    );
+
+    if (!response.ok) throw Error("Refresh failed");
+
+    const data = await response.json();
+    const unique = new Map();
+
+    (data.items || []).forEach(t => {
+      if (t && t.id != null) {
+        unique.set(trackId(t), t);
+      }
+    });
+
+    stop();
+    tracks = [...unique.values()].sort(newestFirst);
+    render();
+
+    const feedResponse = await fetch(
+      "./data/feed.json?t=" + Date.now(),
+      { cache: "no-store" }
+    );
+
+    if (feedResponse.ok) {
+      const feedData = await feedResponse.json();
+
+      if (feedData.updated) {
+        const date = new Date(feedData.updated + "T12:00:00");
+
+        if (!Number.isNaN(date.getTime())) {
+          $("lastUpdated").textContent =
+            "Last updated: " +
+            date.toLocaleDateString("en-CA", {
+              month: "short",
+              day: "numeric",
+              year: "numeric"
+            });
+        }
+      }
+    }
+  } catch (error) {
+    console.error("Music refresh failed:", error);
+    alert("Couldn't refresh music. Please try again.");
+  } finally {
+    button.disabled = false;
+    button.classList.remove("refreshing");
+  }
+});
+
 </script>
 </body>
 </html>
