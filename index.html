@@ -705,6 +705,22 @@ footer{text-align:center;color:#888;font-size:12px;padding:30px}
 }
 
 
+/* Artist name and Now Playing alignment */
+.artist-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.artist-row .artist {
+  min-width: 0;
+}
+
+.artist-row .playing-indicator {
+  margin-left: auto;
+}
+
 
 </style>
 </head>
@@ -1114,28 +1130,30 @@ return `<article class="card ${playing === id ? 'now-playing' : ''}">
 </div>
 
         
+
 <div class="song-title-row">
   <h2>${escapeHTML(t.title)}</h2>
-
-  ${playing === id ? `
-    
-<div class="playing-indicator">
-  <div class="playing-equalizer"
-       aria-label="Now playing"
-       role="img">
-    <span></span>
-    <span></span>
-    <span></span>
-    <span></span>
-    <span></span>
-  </div>
-  <span class="now-playing-label">NOW PLAYING</span>
 </div>
 
+<div class="artist-row">
+  <div class="artist">${escapeHTML(t.artist)}</div>
+
+  ${playing === id ? `
+    <div class="playing-indicator">
+      <div class="playing-equalizer"
+           aria-label="Now playing"
+           role="img">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+      <span class="now-playing-label">NOW PLAYING</span>
+    </div>
   ` : ""}
 </div>
 
-<div class="artist">${escapeHTML(t.artist)}</div>
 
         <p class="desc">
           ${escapeHTML(t.description ||
