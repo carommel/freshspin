@@ -722,6 +722,44 @@ footer{text-align:center;color:#888;font-size:12px;padding:30px}
 }
 
 
+/* NOW PLAYING badge on album artwork */
+.art {
+  position: relative;
+}
+
+.art-now-playing {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  z-index: 3;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+
+  background: rgba(0, 0, 0, 0.9);
+  border: 1px solid rgba(200, 164, 93, 0.3);
+  border-radius: 14px;
+  padding: 7px 12px;
+
+  pointer-events: none;
+}
+
+.art-now-playing .playing-equalizer {
+  height: 20px;
+}
+
+.art-now-playing .now-playing-label {
+  display: block;
+  color: #c8a45d;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
 </style>
 </head>
 <body>
@@ -1112,10 +1150,24 @@ return `<article class="card ${playing === id ? 'now-playing' : ''}">
        fill="white" aria-hidden="true">
        <path d="M7 3.5v17l14-8.5z"/>
      </svg>`}
+
   </span>
 ` : ""}
+
+${playing === id ? `
+  <div class="art-now-playing">
+    <div class="playing-equalizer"
+         aria-label="Now playing"
+         role="img">
+      <span></span><span></span><span></span><span></span><span></span>
+    </div>
+    <span class="now-playing-label">NOW PLAYING</span>
+  </div>
+` : ""}
+
       </div>
       <div class="info">
+
         
 <div class="card-meta">
   <div class="label">
@@ -1135,24 +1187,11 @@ return `<article class="card ${playing === id ? 'now-playing' : ''}">
   <h2>${escapeHTML(t.title)}</h2>
 </div>
 
+
 <div class="artist-row">
   <div class="artist">${escapeHTML(t.artist)}</div>
-
-  ${playing === id ? `
-    <div class="playing-indicator">
-      <div class="playing-equalizer"
-           aria-label="Now playing"
-           role="img">
-        <span></span>
-        <span></span>
-        <span></span>
-        <span></span>
-        <span></span>
-      </div>
-      <span class="now-playing-label">NOW PLAYING</span>
-    </div>
-  ` : ""}
 </div>
+
 
 
         <p class="desc">
