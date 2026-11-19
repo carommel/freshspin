@@ -686,81 +686,7 @@ footer{text-align:center;color:#888;font-size:12px;padding:30px}
 
 
 /* Animation settings panel */
-.animation-settings {
-  background: #171717;
-  border: 1px solid #c8a45d;
-  border-radius: 12px;
-  padding: 16px;
-  margin: 10px 0;
-}
 
-.animation-settings[hidden] {
-  display: none;
-}
-
-.animation-setting-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  cursor: pointer;
-}
-
-.animation-setting-text {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.animation-setting-text strong {
-  color: #f5f1e8;
-  font-size: 13px;
-}
-
-.animation-setting-text small {
-  color: #aaa;
-  font-size: 11px;
-  line-height: 1.4;
-}
-
-#animateEqualizer {
-  appearance: none;
-  -webkit-appearance: none;
-  width: 42px;
-  height: 24px;
-  border-radius: 20px;
-  background: #555;
-  border: 1px solid #777;
-  position: relative;
-  cursor: pointer;
-  flex-shrink: 0;
-}
-
-#animateEqualizer::before {
-  content: "";
-  position: absolute;
-  width: 18px;
-  height: 18px;
-  top: 2px;
-  left: 2px;
-  background: white;
-  border-radius: 50%;
-  transition: transform 0.2s ease;
-}
-
-#animateEqualizer:checked {
-  background: #c8a45d;
-  border-color: #c8a45d;
-}
-
-#animateEqualizer:checked::before {
-  transform: translateX(18px);
-}
-
-#animateEqualizer:focus-visible {
-  outline: 2px solid white;
-  outline-offset: 3px;
-}
 
 
 /* Artist name and Now Playing alignment */
@@ -870,31 +796,12 @@ footer{text-align:center;color:#888;font-size:12px;padding:30px}
       <path d="M3 6h18M3 12h18M3 18h18"></path>
     </svg>
  </button>
-<button type="button"
-        class="header-icon"
-        id="settingsIcon"
-        aria-label="Animation settings"
-        aria-controls="animationSettings"
-        aria-expanded="false">
-  <svg viewBox="0 0 24 24" aria-hidden="true">
-    <circle cx="12" cy="12" r="3"></circle>
-    <path d="M12 2v3M12 19v3M4.93 4.93l2.12 2.12M16.95 16.95l2.12 2.12M2 12h3M19 12h3M4.93 19.07l2.12-2.12M16.95 7.05l2.12-2.12"></path>
-  </svg>
-</button>
-  
+
 </div>
 </div>
 <nav id="tabs">
   
-<div class="animation-settings" id="animationSettings" hidden>
-  <label class="animation-setting-row" for="animateEqualizer">
-    <span class="animation-setting-text">
-      <strong>Animate equalizer</strong>
-      <small>Allow animation even when Reduce Motion is on.</small>
-    </span>
-    <input type="checkbox" id="animateEqualizer">
-  </label>
-</div>
+
 
 <button class="tab active" data-tab="all">All Music</button>
 <button class="tab" data-tab="new">Just Dropped</button>
@@ -1217,14 +1124,11 @@ return `<article class="card ${playing === id ? 'now-playing' : ''}">
 ` : ""}
 
 ${playing === id ? `
-  <div class="art-now-playing">
-    <div class="playing-equalizer"
-         aria-label="Now playing"
-         role="img">
-      <span></span><span></span><span></span><span></span><span></span>
-    </div>
-    <span class="now-playing-label">NOW PLAYING</span>
-  </div>
+  
+<div class="art-now-playing">
+  <span class="now-playing-label">NOW PLAYING</span>
+</div>
+
 ` : ""}
 
       </div>
@@ -1490,45 +1394,6 @@ audio.addEventListener("ended", () => {
   render();
 });
 
-const settingsIcon = document.getElementById("settingsIcon");
-const animationSettings = document.getElementById("animationSettings");
-
-settingsIcon.addEventListener("click", () => {
-  const opening = animationSettings.hidden;
-  animationSettings.hidden = !opening;
-  settingsIcon.setAttribute("aria-expanded", String(opening));
-});
-
-const animateEqualizer = document.getElementById("animateEqualizer");
-
-function applyEqualizerPreference() {
-  document.documentElement.classList.toggle(
-    "force-equalizer-animation",
-    animateEqualizer.checked
-  );
-}
-
-try {
-  animateEqualizer.checked =
-    localStorage.getItem("recs-effect-animate-equalizer") === "true";
-} catch {
-  animateEqualizer.checked = false;
-}
-
-applyEqualizerPreference();
-
-animateEqualizer.addEventListener("change", () => {
-  applyEqualizerPreference();
-
-  try {
-    localStorage.setItem(
-      "recs-effect-animate-equalizer",
-      String(animateEqualizer.checked)
-    );
-  } catch {
-    // Animation preference still works for this visit.
-  }
-});
 
 document.querySelectorAll("[data-tab]").forEach(b => {
   b.onclick = () => {
