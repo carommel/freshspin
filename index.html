@@ -655,8 +655,11 @@ async function loadLikedSongs() {
     return;
   }
 
-  likedSongs = new Set(data.map(row => row.song_id));
-  render();
+  
+likedSongs = new Set(data.map(row => row.song_id));
+likesReady = true;
+render();
+
 }
 
 
@@ -668,6 +671,9 @@ let tab = "all";
 let playing = null;
 let visibleCount = 25; 
 let likedSongs = new Set();
+let pendingLikes = new Set();
+let likesReady = false;
+
 
 
 const PAGE_SIZE = 25;
@@ -929,6 +935,7 @@ const dateLabel = addedDate
 <button class="secondary like-btn"
         type="button"
         data-like="${escapeHTML(id)}"
+${!likesReady ? 'disabled' : ''}
         aria-label="${likedSongs.has(id) ? 'Unlike this song' : 'Like this song'}"
         aria-pressed="${likedSongs.has(id)}">
 
@@ -996,65 +1003,76 @@ $("feed").addEventListener("click", async e => {
 
   const like = e.target.closest("[data-like]");
 
-  if (like) {
-    const id = like.dataset.like;
 
+if (like) {
+  
+if (!likesReady) return;
+
+  const id = like.dataset.like;
+
+  if (pendingLikes.has(id)) return;
+  pendingLikes.add(id);
+
+  // Remember the original state
+  const wasLiked = likedSongs.has(id);
+
+  // Update the heart immediately
+  if (wasLiked) {
+    likedSongs.delete(id);
+  } else {
+    likedSongs.add(id);
+  }
+
+  render();
+
+  try {
     const { data: { user }, error: userError } =
       await supabaseClient.auth.getUser();
 
     if (userError || !user) {
-      alert("Likes are temporarily unavailable.");
-      return;
+      throw userError || new Error("No Likes session");
     }
 
-    const { data: existing, error: checkError } =
-      await supabaseClient
+    if (wasLiked) {
+      // Remove the Like from Supabase
+      const { error } = await supabaseClient
         .from("song_likes")
-        .select("id")
+        .delete()
         .eq("song_id", id)
-        .eq("visitor_id", user.id)
-        .maybeSingle();
+        .eq("visitor_id", user.id);
 
-    if (checkError) {
-      console.error("Like check failed:", checkError);
-      return;
+      if (error) throw error;
+    } else {
+      // Save the Like to Supabase
+      const { error } = await supabaseClient
+        .from("song_likes")
+        .insert({
+          song_id: id,
+          visitor_id: user.id
+        });
+
+      if (error) throw error;
+    }
+  } catch (error) {
+    console.error("Could not save Like:", error);
+
+    // Restore the original heart if saving fails
+    if (wasLiked) {
+      likedSongs.add(id);
+    } else {
+      likedSongs.delete(id);
     }
 
-   
-if (existing) {
-  const { error } = await supabaseClient
-    .from("song_likes")
-    .delete()
-    .eq("song_id", id)
-    .eq("visitor_id", user.id);
-
-  if (error) {
-    console.error("Unlike failed:", error);
-    return;
+    render();
+    alert("Couldn't save your Like. Please try again.");
+  } finally {
+    // Allow this song to be clicked again
+    pendingLikes.delete(id);
   }
 
-  likedSongs.delete(id);
-} else {
-  const { error } = await supabaseClient
-    .from("song_likes")
-    .insert({
-      song_id: id,
-      visitor_id: user.id
-    });
-
-  if (error) {
-    console.error("Like failed:", error);
-    return;
-  }
-
-  likedSongs.add(id);
+  return;
 }
 
-render();
-
-
-    return;
-  }
 
 
   if (play) {
