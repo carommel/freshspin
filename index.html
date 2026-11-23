@@ -1092,7 +1092,6 @@ function stop() {
   audio.removeAttribute("src");
   audio.load();
   playing = null;
-  updateMiniPlayer();
 }
 
 function trackId(t) {
@@ -1203,6 +1202,24 @@ function getPlaybackQueue() {
     );
   });
 }
+  function scrollToPlayingCard() {
+  if (!playing) return;
+
+  const cards = document.querySelectorAll(
+    "#feed .card[data-track-id]"
+  );
+
+  const activeCard = Array.from(cards).find(
+    card => card.dataset.trackId === playing
+  );
+
+  if (!activeCard) return;
+
+  activeCard.scrollIntoView({
+    behavior: "smooth",
+    block: "center"
+  });
+}
 function render() {
   const q = $("search").value.trim().toLowerCase();
   const g = $("genre").value.toLowerCase();
@@ -1260,7 +1277,7 @@ const dateLabel = addedDate
       "JUST DROPPED";
 
     
-return `<article class="card ${playing === id ? 'now-playing' : ''}">
+return `<article class="card ${playing === id ? 'now-playing' : ''}" data-track-id="${escapeHTML(id)}">
 
      <div class="art"
      ${preview ? `
@@ -1565,15 +1582,17 @@ audio.addEventListener("ended", async () => {
 
   const nextTrack = queue[currentIndex + 1];
 
-  if (!nextTrack) {
-    stop();
-    render();
-    return;
-  }
-
+ if (!nextTrack) {
   stop();
+  updateMiniPlayer();
+  render();
+  return;
+}
+
+    audio.pause();
   audio.src = safeURL(nextTrack.previewUrl);
   playing = trackId(nextTrack);
+  updateMiniPlayer();
   render();
 
   try {
@@ -1617,10 +1636,12 @@ audio.addEventListener("emptied", () => {
 
   if (!nextTrack) return;
 
-  stop();
+   audio.pause();
   audio.src = safeURL(nextTrack.previewUrl);
   playing = trackId(nextTrack);
+  updateMiniPlayer();
   render();
+  scrollToPlayingCard();
 
   try {
     await audio.play();
@@ -1639,10 +1660,12 @@ audio.addEventListener("emptied", () => {
 
   const previousTrack = queue[currentIndex - 1];
 
-  stop();
+   audio.pause();
   audio.src = safeURL(previousTrack.previewUrl);
-  playing = trackId(previousTrack);
+    playing = trackId(previousTrack);
+  updateMiniPlayer();
   render();
+  scrollToPlayingCard();
 
   try {
     await audio.play();
