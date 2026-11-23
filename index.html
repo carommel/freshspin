@@ -845,6 +845,10 @@ footer{text-align:center;color:#888;font-size:12px;padding:30px}
   height: 100%;
   background: #c8a45d;
 }
+/* Leave room above music cards when scrolling */
+#feed .card {
+  scroll-margin-top: 24px;
+}
 </style>
 </head>
 <body>
@@ -1586,22 +1590,44 @@ try {
 });
 
 audio.addEventListener("ended", async () => {
-  const trackIndex = getAvailableTracks()
-    .filter(t => {
-      const q = $("search").value.trim().toLowerCase();
-      const g = $("genre").value.toLowerCase();
-      const genre = String(t.genre || "").toLowerCase();
-      const searchable = (
-        String(t.title || "") + " " +
-        String(t.artist || "") + " " +
-        String(t.description || "")
-      ).toLowerCase();
+  const queue = getPlaybackQueue();
 
-      return (
-        (g === "all" || genre.includes(g)) &&
-        searchable.includes(q)
-      );
-    })
+  const currentIndex = queue.findIndex(
+    t => trackId(t) === playing
+  );
+
+  if (currentIndex === -1) {
+    stop();
+    updateMiniPlayer();
+    render();
+    return;
+  }
+
+  const nextTrack = queue[currentIndex + 1];
+
+  if (!nextTrack) {
+    stop();
+    updateMiniPlayer();
+    render();
+    return;
+  }
+
+  audio.pause();
+  audio.src = safeURL(nextTrack.previewUrl);
+  playing = trackId(nextTrack);
+  updateMiniPlayer();
+  render();
+
+  try {
+    await audio.play();
+    updateMiniPlayer();
+  } catch {
+    stop();
+    updateMiniPlayer();
+    render();
+    alert("Couldn't play the next preview.");
+  }
+});
     .findIndex(t => trackId(t) === playing);
 
   const nextTrack = queue[currentIndex + 1];
