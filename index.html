@@ -1230,9 +1230,15 @@ function getPlaybackQueue() {
 
   if (!activeCard) return;
 
-  activeCard.scrollIntoView({
-  behavior: "smooth",
-  block: "start"
+  const cardTop =
+  activeCard.getBoundingClientRect().top +
+  window.scrollY;
+
+const topSpacing = 100;
+
+window.scrollTo({
+  top: Math.max(0, cardTop - topSpacing),
+  behavior: "smooth"
 });
 }
 function render() {
