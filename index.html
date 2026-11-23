@@ -1670,9 +1670,14 @@ audio.addEventListener("emptied", () => {
    audio.pause();
   audio.src = safeURL(nextTrack.previewUrl);
   playing = trackId(nextTrack);
-  updateMiniPlayer();
+   updateMiniPlayer();
   render();
-  scrollToPlayingCard();
+
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      scrollToPlayingCard();
+    });
+  });
 
   try {
     await audio.play();
