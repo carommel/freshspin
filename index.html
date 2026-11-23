@@ -751,7 +751,84 @@ footer{text-align:center;color:#888;font-size:12px;padding:30px}
 #search {
   font-size: 16px !important;
 }
+/* Fixed bottom mini music player */
+.mini-player {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px 18px;
+  background: #171717;
+  border-top: 1px solid #c8a45d;
+  color: #f5f1e8;
+  box-sizing: border-box;
+}
 
+.mini-player[hidden] {
+  display: none;
+}
+
+#miniArtwork {
+  width: 46px;
+  height: 46px;
+  object-fit: cover;
+  border-radius: 5px;
+  flex-shrink: 0;
+}
+
+.mini-track-info {
+  flex: 1;
+  min-width: 0;
+}
+
+#miniTitle {
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#miniArtist {
+  font-size: 11px;
+  color: #aaa;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mini-player button {
+  background: transparent;
+  border: none;
+  color: #f5f1e8;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 6px;
+  flex-shrink: 0;
+}
+
+#miniPlayPause {
+  color: #c8a45d;
+}
+
+.mini-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: #444;
+}
+
+#miniProgressFill {
+  width: 0%;
+  height: 100%;
+  background: #c8a45d;
+}
 </style>
 </head>
 <body>
@@ -865,6 +942,19 @@ footer{text-align:center;color:#888;font-size:12px;padding:30px}
 </main>
 
 <footer>Discover. Preview. Save. Repeat.</footer>
+  <div id="miniPlayer" class="mini-player" hidden>
+  <img id="miniArtwork" alt="Album artwork">
+  <div class="mini-track-info">
+    <div id="miniTitle"></div>
+    <div id="miniArtist"></div>
+  </div>
+  <button id="miniPrevious" aria-label="Previous song">⏮</button>
+  <button id="miniPlayPause" aria-label="Play or pause">▶</button>
+  <button id="miniNext" aria-label="Next song">⏭</button>
+  <div class="mini-progress">
+    <div id="miniProgressFill"></div>
+  </div>
+</div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
   
@@ -947,6 +1037,12 @@ const PAGE_SIZE = 25;
 const ALL_LIMIT = 75;
 const audio = new Audio();
 const $ = id => document.getElementById(id);
+  const miniPlayer = $("miniPlayer");
+const miniArtwork = $("miniArtwork");
+const miniTitle = $("miniTitle");
+const miniArtist = $("miniArtist");
+const miniPlayPause = $("miniPlayPause");
+const miniProgressFill = $("miniProgressFill");
 
 let saved = new Set(
   JSON.parse(localStorage.getItem("freshspin-saved") || "[]")
@@ -980,6 +1076,7 @@ function stop() {
   audio.removeAttribute("src");
   audio.load();
   playing = null;
+  updateMiniPlayer();
 }
 
 function trackId(t) {
@@ -1014,7 +1111,35 @@ function getTrack(id) {
   return tracks.find(t => trackId(t) === id) ||
     savedTracks[id];
 }
+function updateMiniPlayer() {
+  if (!playing) {
+    miniPlayer.hidden = true;
+    return;
+  }
 
+  const t = getTrack(playing);
+
+  if (!t) {
+    miniPlayer.hidden = true;
+    return;
+  }
+
+  miniTitle.textContent = t.title || "Unknown title";
+  miniArtist.textContent = t.artist || "Unknown artist";
+
+  const artwork = safeURL(t.artwork);
+
+  if (artwork) {
+    miniArtwork.src = artwork;
+    miniArtwork.hidden = false;
+  } else {
+    miniArtwork.removeAttribute("src");
+    miniArtwork.hidden = true;
+  }
+
+  miniPlayPause.textContent = audio.paused ? "▶" : "⏸";
+  miniPlayer.hidden = false;
+}
 function getAvailableTracks() {
   if (tab === "saved") {
     const combined = new Map();
@@ -1040,7 +1165,26 @@ function getAvailableTracks() {
 
   return tracks.filter(t => t.category === tab);
 }
+function getPlaybackQueue() {
+  const q = $("search").value.trim().toLowerCase();
+  const g = $("genre").value.toLowerCase();
 
+  return getAvailableTracks().filter(t => {
+    const genre = String(t.genre || "").toLowerCase();
+
+    const searchable = (
+      String(t.title || "") + " " +
+      String(t.artist || "") + " " +
+      String(t.description || "")
+    ).toLowerCase();
+
+    return (
+      safeURL(t.previewUrl) &&
+      (g === "all" || genre.includes(g)) &&
+      searchable.includes(q)
+    );
+  });
+}
 function render() {
   const q = $("search").value.trim().toLowerCase();
   const g = $("genre").value.toLowerCase();
@@ -1379,26 +1523,119 @@ if (!likesReady) return;
     }
 
     stop();
-    audio.src = safeURL(t.previewUrl);
-    playing = id;
-    render();
+audio.src = safeURL(t.previewUrl);
+playing = id;
+render();
 
-    try {
-      await audio.play();
-    } catch {
-      stop();
-      render();
-      alert("Preview unavailable.");
-    }
+try {
+  await audio.play();
+  updateMiniPlayer();
+} catch {
+  stop();
+  render();
+  updateMiniPlayer();
+  alert("Preview unavailable.");
+}
   }
 });
 
-audio.addEventListener("ended", () => {
-  playing = null;
+audio.addEventListener("ended", async () => {
+  const queue = getPlaybackQueue();
+  const currentIndex = queue.findIndex(
+    t => trackId(t) === playing
+  );
+
+  const nextTrack = queue[currentIndex + 1];
+
+  if (!nextTrack) {
+    stop();
+    render();
+    return;
+  }
+
+  stop();
+  audio.src = safeURL(nextTrack.previewUrl);
+  playing = trackId(nextTrack);
   render();
+
+  try {
+    await audio.play();
+    updateMiniPlayer();
+  } catch {
+    stop();
+    render();
+    alert("Couldn't play the next preview.");
+  }
+});
+miniPlayPause.addEventListener("click", async () => {
+  if (!playing) return;
+
+  if (audio.paused) {
+    try {
+      await audio.play();
+    } catch {
+      alert("Couldn't resume preview.");
+    }
+  } else {
+    audio.pause();
+  }
+
+  updateMiniPlayer();
+});
+audio.addEventListener("timeupdate", () => {
+  if (audio.duration && Number.isFinite(audio.duration)) {
+    const progress = (audio.currentTime / audio.duration) * 100;
+    miniProgressFill.style.width = progress + "%";
+  }
 });
 
+audio.addEventListener("emptied", () => {
+  miniProgressFill.style.width = "0%";
+});
+  $("miniNext").addEventListener("click", async () => {
+  const queue = getPlaybackQueue();
+  const currentIndex = queue.findIndex(t => trackId(t) === playing);
+  const nextTrack = queue[currentIndex + 1];
 
+  if (!nextTrack) return;
+
+  stop();
+  audio.src = safeURL(nextTrack.previewUrl);
+  playing = trackId(nextTrack);
+  render();
+
+  try {
+    await audio.play();
+    updateMiniPlayer();
+  } catch {
+    stop();
+    render();
+    alert("Next preview unavailable.");
+  }
+});
+  $("miniPrevious").addEventListener("click", async () => {
+  const queue = getPlaybackQueue();
+  const currentIndex = queue.findIndex(t => trackId(t) === playing);
+
+  if (currentIndex <= 0) return;
+
+  const previousTrack = queue[currentIndex - 1];
+
+  stop();
+  audio.src = safeURL(previousTrack.previewUrl);
+  playing = trackId(previousTrack);
+  render();
+
+  try {
+    await audio.play();
+    updateMiniPlayer();
+  } catch {
+    stop();
+    render();
+    updateMiniPlayer();
+    alert("Previous preview unavailable.");
+  }
+});
 document.querySelectorAll("[data-tab]").forEach(b => {
   b.onclick = () => {
     tab = b.dataset.tab;
