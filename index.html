@@ -1204,6 +1204,17 @@ function getPlaybackQueue() {
 }
   function scrollToPlayingCard() {
   if (!playing) return;
+      const queue = getPlaybackQueue();
+  const trackIndex = queue.findIndex(
+    t => trackId(t) === playing
+  );
+
+  if (trackIndex >= visibleCount) {
+    visibleCount = Math.ceil(
+      (trackIndex + 1) / PAGE_SIZE
+    ) * PAGE_SIZE;
+    render();
+  }
 
   const cards = document.querySelectorAll(
     "#feed .card[data-track-id]"
@@ -1216,9 +1227,9 @@ function getPlaybackQueue() {
   if (!activeCard) return;
 
   activeCard.scrollIntoView({
-    behavior: "smooth",
-    block: "center"
-  });
+  behavior: "smooth",
+  block: "start"
+});
 }
 function render() {
   const q = $("search").value.trim().toLowerCase();
@@ -1575,10 +1586,23 @@ try {
 });
 
 audio.addEventListener("ended", async () => {
-  const queue = getPlaybackQueue();
-  const currentIndex = queue.findIndex(
-    t => trackId(t) === playing
-  );
+  const trackIndex = getAvailableTracks()
+    .filter(t => {
+      const q = $("search").value.trim().toLowerCase();
+      const g = $("genre").value.toLowerCase();
+      const genre = String(t.genre || "").toLowerCase();
+      const searchable = (
+        String(t.title || "") + " " +
+        String(t.artist || "") + " " +
+        String(t.description || "")
+      ).toLowerCase();
+
+      return (
+        (g === "all" || genre.includes(g)) &&
+        searchable.includes(q)
+      );
+    })
+    .findIndex(t => trackId(t) === playing);
 
   const nextTrack = queue[currentIndex + 1];
 
