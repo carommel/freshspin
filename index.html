@@ -1628,32 +1628,7 @@ audio.addEventListener("ended", async () => {
     alert("Couldn't play the next preview.");
   }
 });
-    .findIndex(t => trackId(t) === playing);
-
-  const nextTrack = queue[currentIndex + 1];
-
- if (!nextTrack) {
-  stop();
-  updateMiniPlayer();
-  render();
-  return;
-}
-
-    audio.pause();
-  audio.src = safeURL(nextTrack.previewUrl);
-  playing = trackId(nextTrack);
-  updateMiniPlayer();
-  render();
-
-  try {
-    await audio.play();
-    updateMiniPlayer();
-  } catch {
-    stop();
-    render();
-    alert("Couldn't play the next preview.");
-  }
-});
+    
 miniPlayPause.addEventListener("click", async () => {
   if (!playing) return;
 
