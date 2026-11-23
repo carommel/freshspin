@@ -1234,15 +1234,19 @@ function getPlaybackQueue() {
 
   if (!activeCard) return;
 
-  const cardTop =
-  activeCard.getBoundingClientRect().top +
-  window.scrollY;
+  const artwork = activeCard.querySelector(".art");
+const target = artwork || activeCard;
 
 const topSpacing = 100;
 
+const targetTop =
+  target.getBoundingClientRect().top +
+  window.scrollY -
+  topSpacing;
+
 window.scrollTo({
-  top: Math.max(0, cardTop - topSpacing),
-  behavior: "smooth"
+  top: Math.max(0, targetTop),
+  behavior: "instant"
 });
 }
 function render() {
