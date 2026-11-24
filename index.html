@@ -853,6 +853,35 @@ footer{text-align:center;color:#888;font-size:12px;padding:30px}
 #feed {
   overflow-anchor: none;
 }
+  /* Play All button */
+#playAllContainer {
+  display: flex;
+  justify-content: flex-end;
+  margin: 0 0 16px;
+}
+
+#playAllContainer[hidden] {
+  display: none;
+}
+
+#playAllButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #f4e9d4;
+  color: #171717;
+  border: none;
+  border-radius: 999px;
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+#playAllButton:active {
+  opacity: 0.8;
+}
 </style>
 </head>
 <body>
@@ -961,6 +990,16 @@ footer{text-align:center;color:#888;font-size:12px;padding:30px}
 
 <main>
 <div id="status">Loading music...</div>
+
+<div id="playAllContainer" hidden>
+  <button id="playAllButton" type="button">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M8 5v14l11-7z"/>
+    </svg>
+    Play All
+  </button>
+</div>
+
 <div id="feed"></div>
 <button id="more">Load More</button>
 </main>
@@ -1251,6 +1290,8 @@ window.scrollTo({
 });
 }
 function render() {
+    $("playAllContainer").hidden =
+    tab !== "all" || getPlaybackQueue().length === 0;
   const q = $("search").value.trim().toLowerCase();
   const g = $("genre").value.toLowerCase();
 
@@ -1668,6 +1709,30 @@ audio.addEventListener("timeupdate", () => {
 
 audio.addEventListener("emptied", () => {
   miniProgressFill.style.width = "0%";
+});
+  $("playAllButton").addEventListener("click", async () => {
+  const queue = getPlaybackQueue();
+
+  if (!queue.length) return;
+
+  const firstTrack = queue[0];
+
+  audio.pause();
+  audio.src = safeURL(firstTrack.previewUrl);
+  playing = trackId(firstTrack);
+
+  updateMiniPlayer();
+  render();
+
+  try {
+    await audio.play();
+    updateMiniPlayer();
+  } catch {
+    stop();
+    updateMiniPlayer();
+    render();
+    alert("Couldn't start playback.");
+  }
 });
   $("miniNext").addEventListener("click", async () => {
   const queue = getPlaybackQueue();
