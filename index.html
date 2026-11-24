@@ -1237,7 +1237,8 @@ function getPlaybackQueue() {
   const artwork = activeCard.querySelector(".art");
 const target = artwork || activeCard;
 
-const topSpacing = 100;
+const header = document.querySelector("header");
+const topSpacing = (header ? header.getBoundingClientRect().height : 0) + 12;
 
 const targetTop =
   target.getBoundingClientRect().top +
