@@ -1907,9 +1907,24 @@ $("refreshMusic").addEventListener("click", async () => {
       }
     });
 
-    stop();
     tracks = [...unique.values()].sort(newestFirst);
-    render();
+
+tab = "all";
+visibleCount = PAGE_SIZE;
+
+$("search").value = "";
+$("genre").value = "all";
+
+document.querySelectorAll("[data-tab]").forEach(b => {
+  b.classList.toggle("active", b.dataset.tab === "all");
+});
+
+render();
+
+window.scrollTo({
+  top: 0,
+  behavior: "smooth"
+});
 
     const feedResponse = await fetch(
       "./data/feed.json?t=" + Date.now(),
