@@ -1909,18 +1909,9 @@ $("refreshMusic").addEventListener("click", async () => {
 
     tracks = [...unique.values()].sort(newestFirst);
 
-tab = "all";
 visibleCount = PAGE_SIZE;
 
-$("search").value = "";
-$("genre").value = "all";
-
-document.querySelectorAll("[data-tab]").forEach(b => {
-  b.classList.toggle("active", b.dataset.tab === "all");
-});
-
 render();
-
 window.scrollTo({
   top: 0,
   behavior: "smooth"
