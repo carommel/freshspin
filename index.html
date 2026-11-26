@@ -89,13 +89,13 @@ h1{margin:0;font-size:29px;letter-spacing:-1px}
   top:100%;
   left:8px;
   margin-top:6px;
-  background:#F0E6D5;
-  border:1px solid #D8CDBB;
-  border-radius:8px;
-  padding:10px;
-  min-width:160px;
-  box-shadow:0 8px 20px rgba(0,0,0,0.2);
-  z-index:20;
+  background:#171717;
+  border:1px solid #c8a45d;
+  border-radius:10px;
+  width:220px;
+  overflow:hidden;
+  box-shadow:0 8px 24px rgba(0,0,0,0.4);
+  z-index:30;
 }
 
 .genre-popup.open{
@@ -103,13 +103,82 @@ h1{margin:0;font-size:29px;letter-spacing:-1px}
 }
 
 .genre-popup select{
+  display:none;
+}
+
+.genre-toggle{
+  display:flex;
+  align-items:center;
+  gap:12px;
   width:100%;
-  background:#F0E6D5;
-  color:#171717;
-  border:1px solid #C8BCA8;
-  border-radius:5px;
-  padding:10px;
-  font-size:13px;
+  padding:14px;
+  background:transparent;
+  color:#FAF7F0;
+  border:0;
+  font-size:14px;
+  font-weight:600;
+  text-align:left;
+}
+
+.genre-toggle svg{
+  width:20px;
+  height:20px;
+  fill:none;
+  stroke:#c8a45d;
+  stroke-width:1.8;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  flex-shrink:0;
+}
+
+.genre-toggle .genre-chevron{
+  margin-left:auto;
+  transition:transform 0.2s ease;
+}
+
+.genre-toggle[aria-expanded="true"] .genre-chevron{
+  transform:rotate(180deg);
+}
+
+.genre-options{
+  border-top:1px solid #444;
+}
+
+.genre-options[hidden]{
+  display:none;
+}
+
+.genre-options button{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  width:100%;
+  padding:12px 16px;
+  background:transparent;
+  color:#FAF7F0;
+  border:0;
+  text-align:left;
+  font-size:14px;
+}
+
+.genre-options button.selected{
+  background:#30271a;
+  color:#c8a45d;
+  font-weight:600;
+}
+
+.genre-options button.selected::after{
+  content:"✓";
+  color:#c8a45d;
+}
+
+.genre-options button:hover{
+  background:#292929;
+}
+
+.category-bar #genreIcon.filter-active,
+.category-bar #genreIcon[aria-expanded="true"]{
+  color:#c8a45d;
 }
   .header-icon{
   background:transparent;
@@ -1020,8 +1089,32 @@ footer{text-align:center;color:#888;font-size:12px;padding:30px}
 </div>
 
 <div class="category-bar">
-   <div class="genre-popup" id="genrePopup">
-  <select id="genre" aria-label="Choose music genre">
+  <div class="genre-popup" id="genrePopup">
+
+  <button type="button" id="genreToggle" class="genre-toggle"
+          aria-expanded="false" aria-controls="genreOptions">
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M9 18V5l12-2v13"/>
+      <ellipse cx="6" cy="18" rx="3" ry="2"/>
+      <ellipse cx="18" cy="16" rx="3" ry="2"/>
+    </svg>
+    <span>Genres</span>
+    <svg class="genre-chevron" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M6 9l6 6 6-6"/>
+    </svg>
+  </button>
+
+  <div id="genreOptions" class="genre-options" hidden>
+    <button type="button" data-genre="all" class="selected">All genres</button>
+    <button type="button" data-genre="Soul">Soul</button>
+    <button type="button" data-genre="R&amp;B">R&amp;B</button>
+    <button type="button" data-genre="Funk">Funk</button>
+    <button type="button" data-genre="Jazz">Jazz</button>
+    <button type="button" data-genre="Hip-hop">Hip-hop</button>
+    <button type="button" data-genre="Rap">Rap</button>
+  </div>
+
+  <select id="genre" aria-label="Choose music genre" hidden>
     <option value="all">All genres</option>
     <option>Soul</option>
     <option>R&amp;B</option>
@@ -1030,8 +1123,9 @@ footer{text-align:center;color:#888;font-size:12px;padding:30px}
     <option>Hip-hop</option>
     <option>Rap</option>
   </select>
+
 </div>
-  <button type="button" class="header-icon" id="genreIcon" aria-label="Browse genres" aria-controls="genrePopup" aria-expanded="false" onclick="const popup=document.getElementById('genrePopup'); const opening=!popup.classList.contains('open'); popup.classList.toggle('open',opening); this.setAttribute('aria-expanded',String(opening)); document.getElementById('headerFilters').classList.remove('open'); if(opening)document.getElementById('genre').focus();">
+  <button type="button" class="header-icon" id="genreIcon" aria-label="Browse genres" aria-controls="genrePopup" aria-expanded="false">
     <svg viewBox="0 0 24 24" aria-hidden="true">
       <path d="M3 6h18M3 12h18M3 18h18"></path>
     </svg>
@@ -1945,6 +2039,74 @@ $("genre").onchange = () => {
   visibleCount = PAGE_SIZE;
   render();
 };
+  function closeGenreMenu() {
+  $("genrePopup").classList.remove("open");
+  $("genreIcon").setAttribute("aria-expanded", "false");
+  $("genreToggle").setAttribute("aria-expanded", "false");
+  $("genreOptions").hidden = true;
+}
+
+function updateGenreMenu() {
+  const currentGenre = $("genre").value;
+
+  document.querySelectorAll("[data-genre]").forEach(button => {
+    const selected = button.dataset.genre === currentGenre;
+    button.classList.toggle("selected", selected);
+    button.setAttribute("aria-pressed", String(selected));
+  });
+
+  $("genreIcon").classList.toggle(
+    "filter-active",
+    currentGenre !== "all"
+  );
+}
+
+$("genreIcon").addEventListener("click", () => {
+  const opening = !$("genrePopup").classList.contains("open");
+
+  closeGenreMenu();
+  $("headerFilters").classList.remove("open");
+
+  if (opening) {
+    updateGenreMenu();
+    $("genrePopup").classList.add("open");
+    $("genreIcon").setAttribute("aria-expanded", "true");
+  }
+});
+
+$("genreToggle").addEventListener("click", () => {
+  const opening = $("genreOptions").hidden;
+  $("genreOptions").hidden = !opening;
+  $("genreToggle").setAttribute("aria-expanded", String(opening));
+});
+
+document.querySelectorAll("[data-genre]").forEach(button => {
+  button.addEventListener("click", () => {
+    $("genre").value = button.dataset.genre;
+    $("genre").dispatchEvent(new Event("change", { bubbles: true }));
+    updateGenreMenu();
+    closeGenreMenu();
+    $("genreIcon").focus();
+  });
+});
+
+document.addEventListener("click", e => {
+  if (
+    !$("genrePopup").contains(e.target) &&
+    !$("genreIcon").contains(e.target)
+  ) {
+    closeGenreMenu();
+  }
+});
+
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape" && $("genrePopup").classList.contains("open")) {
+    closeGenreMenu();
+    $("genreIcon").focus();
+  }
+});
+
+updateGenreMenu();
 
 $("more").onclick = () => {
   visibleCount += PAGE_SIZE;
