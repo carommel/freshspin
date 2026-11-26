@@ -87,8 +87,9 @@ h1{margin:0;font-size:29px;letter-spacing:-1px}
   display:none;
   position:absolute;
   top:100%;
-  left:8px;
-  margin-top:6px;
+  left:auto;
+  right:0;
+  margin-top:10px;
   background:#171717;
   border:1px solid #c8a45d;
   border-radius:10px;
@@ -323,7 +324,7 @@ nav::-webkit-scrollbar{
   border-bottom: 1px solid #333;
 }
 
-.category-bar #genreIcon {
+.category-bar #searchIcon {
   flex-shrink: 0;
   color: #FAF7F0;
   background: transparent;
@@ -1058,100 +1059,98 @@ footer{text-align:center;color:#888;font-size:12px;padding:30px}
   <span>CLASSIC REWINDS.</span>
 </div>
   </div>
-  <div class="header-icons">
-   
-  <button type="button" class="header-icon" id="searchIcon" aria-label="Search music" onclick="const panel=document.getElementById('headerFilters'); const popup=document.getElementById('genrePopup'); const opening=!panel.classList.contains('open'); panel.classList.toggle('open',opening); popup.classList.remove('open'); document.getElementById('genreIcon').setAttribute('aria-expanded','false'); document.getElementById('search').style.display='block';">
+ <div class="header-icons">
+
+  <button type="button" class="header-icon" id="savedIcon" aria-label="Saved favourites" onclick="document.querySelector('[data-tab=saved]').click()">
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+    </svg>
+  </button>
+
+  <button type="button" class="header-icon" id="digIcon" aria-label="Open Dig Mode" title="Dig Mode">
+    <svg viewBox="0 0 32 32" aria-hidden="true">
+      <path d="M10 3H3V10 M22 3H29V10 M3 22V29H10 M29 22V29H22"
+            fill="none" stroke-width="2.3" stroke-linecap="round"/>
+      <circle cx="16" cy="16" r="9" fill="none" stroke-width="1.8"/>
+      <circle cx="16" cy="16" r="5" fill="none" stroke-width="1.4"/>
+      <circle cx="16" cy="16" r="1.5" fill="currentColor" stroke="none"/>
+    </svg>
+  </button>
+
+  <button type="button" class="header-icon" id="genreIcon" aria-label="Open navigation menu" aria-controls="genrePopup" aria-expanded="false">
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M3 6h18M3 12h18M3 18h18"></path>
+    </svg>
+  </button>
+
+  <div class="genre-popup" id="genrePopup">
+
+    <button type="button" id="genreToggle" class="genre-toggle"
+            aria-expanded="false" aria-controls="genreOptions">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M9 18V5l12-2v13"/>
+        <ellipse cx="6" cy="18" rx="3" ry="2"/>
+        <ellipse cx="18" cy="16" rx="3" ry="2"/>
+      </svg>
+      <span>Genres</span>
+      <svg class="genre-chevron" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M6 9l6 6 6-6"/>
+      </svg>
+    </button>
+
+    <div id="genreOptions" class="genre-options" hidden>
+      <button type="button" data-genre="all" class="selected">All genres</button>
+      <button type="button" data-genre="Soul">Soul</button>
+      <button type="button" data-genre="R&amp;B">R&amp;B</button>
+      <button type="button" data-genre="Funk">Funk</button>
+      <button type="button" data-genre="Jazz">Jazz</button>
+      <button type="button" data-genre="Hip-hop">Hip-hop</button>
+      <button type="button" data-genre="Rap">Rap</button>
+    </div>
+
+    <select id="genre" aria-label="Choose music genre" hidden>
+      <option value="all">All genres</option>
+      <option>Soul</option>
+      <option>R&amp;B</option>
+      <option>Funk</option>
+      <option>Jazz</option>
+      <option>Hip-hop</option>
+      <option>Rap</option>
+    </select>
+
+  </div>
+
+</div>
+</div>
+
+<div class="category-bar">
+
+ <button type="button" class="header-icon" id="searchIcon" aria-label="Search music" onclick="const panel=document.getElementById('headerFilters'); const opening=!panel.classList.contains('open'); closeGenreMenu(); panel.classList.toggle('open',opening); document.getElementById('search').style.display='block';">
     <svg viewBox="0 0 24 24" aria-hidden="true">
       <circle cx="10.5" cy="10.5" r="6.5"></circle>
       <path d="M15.5 15.5L21 21"></path>
     </svg>
   </button>
 
- 
-<button type="button" class="header-icon" id="savedIcon" aria-label="Saved favourites" onclick="document.querySelector('[data-tab=saved]').click()">
-  <svg viewBox="0 0 24 24" aria-hidden="true">
-    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
-  </svg>
-</button>
-
-
- <button type="button" class="header-icon" id="digIcon" aria-label="Open Dig Mode" title="Dig Mode">
-  <svg viewBox="0 0 32 32" aria-hidden="true">
-    <path d="M10 3H3V10 M22 3H29V10 M3 22V29H10 M29 22V29H22"
-          fill="none" stroke-width="2.3" stroke-linecap="round"/>
-    <circle cx="16" cy="16" r="9" fill="none" stroke-width="1.8"/>
-    <circle cx="16" cy="16" r="5" fill="none" stroke-width="1.4"/>
-    <circle cx="16" cy="16" r="1.5" fill="currentColor" stroke="none"/>
-  </svg>
-</button>
-
-</div>
-</div>
-
-<div class="category-bar">
-  <div class="genre-popup" id="genrePopup">
-
-  <button type="button" id="genreToggle" class="genre-toggle"
-          aria-expanded="false" aria-controls="genreOptions">
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M9 18V5l12-2v13"/>
-      <ellipse cx="6" cy="18" rx="3" ry="2"/>
-      <ellipse cx="18" cy="16" rx="3" ry="2"/>
-    </svg>
-    <span>Genres</span>
-    <svg class="genre-chevron" viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M6 9l6 6 6-6"/>
-    </svg>
-  </button>
-
-  <div id="genreOptions" class="genre-options" hidden>
-    <button type="button" data-genre="all" class="selected">All genres</button>
-    <button type="button" data-genre="Soul">Soul</button>
-    <button type="button" data-genre="R&amp;B">R&amp;B</button>
-    <button type="button" data-genre="Funk">Funk</button>
-    <button type="button" data-genre="Jazz">Jazz</button>
-    <button type="button" data-genre="Hip-hop">Hip-hop</button>
-    <button type="button" data-genre="Rap">Rap</button>
-  </div>
-
-  <select id="genre" aria-label="Choose music genre" hidden>
-    <option value="all">All genres</option>
-    <option>Soul</option>
-    <option>R&amp;B</option>
-    <option>Funk</option>
-    <option>Jazz</option>
-    <option>Hip-hop</option>
-    <option>Rap</option>
-  </select>
-
-</div>
-  <button type="button" class="header-icon" id="genreIcon" aria-label="Browse genres" aria-controls="genrePopup" aria-expanded="false">
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M3 6h18M3 12h18M3 18h18"></path>
-    </svg>
-  </button>
-
   <nav id="tabs">
-  
 
+    <button class="tab active" data-tab="all">All Music</button>
+    <button class="tab" data-tab="new">Just Dropped</button>
+    <button class="tab" data-tab="artist">New Artists</button>
+    <button class="tab" data-tab="old">Rediscover</button>
 
-<button class="tab active" data-tab="all">All Music</button>
-<button class="tab" data-tab="new">Just Dropped</button>
-<button class="tab" data-tab="artist">New Artists</button>
-<button class="tab" data-tab="old">Rediscover</button>
+    <button class="tab" data-tab="saved">
+      <svg viewBox="0 0 24 24" width="14" height="14"
+           fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round"
+           aria-hidden="true" style="vertical-align:-2px">
+        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+      </svg>
+      Saved
+    </button>
 
-<button class="tab" data-tab="saved">
-  <svg viewBox="0 0 24 24" width="14" height="14"
-       fill="none" stroke="currentColor" stroke-width="2"
-       stroke-linecap="round" stroke-linejoin="round"
-       aria-hidden="true" style="vertical-align:-2px">
-    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
-  </svg>
-  Saved
-</button>
-
-</nav>
-  </div>
+  </nav>
+</div>
   
 <div class="daily-update-bar">
   <div class="daily-update-info">
