@@ -1042,6 +1042,190 @@ footer{text-align:center;color:#888;font-size:12px;padding:30px}
 #playAllButton:active {
   opacity: 0.8;
 }
+  /* =========================
+   DIG MODE
+   ========================= */
+
+#musicView[hidden],
+#digView[hidden] {
+  display: none !important;
+}
+
+#digView {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 12px 0 24px;
+}
+
+.dig-back {
+  background: transparent;
+  border: none;
+  color: #c8a45d;
+  font-size: 13px;
+  padding: 8px 0;
+  cursor: pointer;
+}
+
+.dig-heading {
+  text-align: center;
+  margin: 18px 0 24px;
+}
+
+.dig-heading h2 {
+  color: #FAF7F0;
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  margin: 0;
+}
+
+.dig-heading p {
+  color: #c8a45d;
+  font-size: 13px;
+  margin: 8px 0 0;
+}
+
+.dig-scan-card {
+  background: #171717;
+  border: 1px solid #c8a45d;
+  border-radius: 16px;
+  padding: 28px 20px 20px;
+  text-align: center;
+}
+
+.dig-scan-art {
+  width: 90px;
+  height: 90px;
+  color: #c8a45d;
+  margin-bottom: 12px;
+}
+
+.dig-scan-card h3 {
+  color: #FAF7F0;
+  font-size: 21px;
+  margin: 0 0 10px;
+}
+
+.dig-scan-card p {
+  color: #aaa;
+  font-size: 13px;
+  line-height: 1.6;
+  max-width: 260px;
+  margin: 0 auto 22px;
+}
+
+#digScanButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  background: #c8a45d;
+  color: #171717;
+  border: none;
+  border-radius: 8px;
+  padding: 14px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+#digScanButton svg {
+  width: 20px;
+  height: 20px;
+}
+
+.dig-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 26px 0 20px;
+  color: #aaa;
+  font-size: 10px;
+  letter-spacing: 1px;
+}
+
+.dig-divider::before,
+.dig-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #444;
+}
+
+.dig-search-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #171717;
+  border: 1px solid #555;
+  border-radius: 8px;
+  padding: 12px 14px;
+}
+
+.dig-search-field:focus-within {
+  border-color: #c8a45d;
+}
+
+.dig-search-field svg {
+  width: 21px;
+  height: 21px;
+  color: #c8a45d;
+  flex-shrink: 0;
+}
+
+#digSearchInput {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #FAF7F0;
+  font-size: 16px;
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+}
+
+#digSearchInput::placeholder {
+  color: #999;
+}
+
+#digSearchButton {
+  width: 100%;
+  background: #f4e9d4;
+  color: #171717;
+  border: none;
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 12px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+#digScanButton:disabled,
+#digSearchButton:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+#digStatus {
+  color: #aaa;
+  font-size: 13px;
+  margin-top: 18px;
+}
+
+#digResults {
+  margin-top: 12px;
+}
+
+.dig-tagline {
+  text-align: center;
+  color: #888;
+  font-size: 11px;
+  margin-top: 30px;
+}
+
+#digIcon.dig-active {
+  color: #9b762f;
+}
 </style>
 </head>
 <body>
@@ -1187,23 +1371,104 @@ footer{text-align:center;color:#888;font-size:12px;padding:30px}
 </header>
 
 <main>
-<div class="feed-toolbar">
-  <div id="status">Loading music...</div>
 
-  <div id="playAllContainer" hidden>
-    <button id="playAllButton" type="button">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-        <path d="M8 5v14l11-7z"/>
-      </svg>
-      Play All
-    </button>
+<div id="musicView">
+
+  <div class="feed-toolbar">
+    <div id="status">Loading music...</div>
+
+    <div id="playAllContainer" hidden>
+      <button id="playAllButton" type="button">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M3 5v14l11-7z"/>
+        </svg>
+        Play All
+      </button>
+    </div>
   </div>
+
+  <div id="feed"></div>
+  <button id="more">Load More</button>
+
 </div>
 
-<div id="feed"></div>
-<button id="more">Load More</button>
-</main>
+<section id="digView" hidden>
 
+  <button id="digBack" class="dig-back" type="button">
+    ← Back to Music
+  </button>
+
+  <div class="dig-heading">
+    <h2>DIG MODE<span class="gold">.</span></h2>
+    <p>Find it. Scan it. Sample it.</p>
+  </div>
+
+  <div class="dig-scan-card">
+
+    <svg class="dig-scan-art" viewBox="0 0 100 100" fill="none" stroke="currentColor" aria-hidden="true">
+      <path d="M25 5H5V25 M75 5H95V25 M5 75V95H25 M95 75V75" stroke-width="3" stroke-linecap="round"/>
+      <path d="M95 75V95H75" stroke-width="3" stroke-linecap="round"/>
+      <circle cx="50" cy="50" r="34"/>
+      <circle cx="50" cy="50" r="28"/>
+      <circle cx="50" cy="50" r="22"/>
+      <circle cx="50" cy="50" r="16"/>
+      <circle cx="50" cy="50" r="9" fill="currentColor"/>
+      <circle cx="50" cy="50" r="2" fill="#171717" stroke="none"/>
+    </svg>
+
+    <h3>Dig &amp; Scan</h3>
+
+    <p>Found a record? Scan the cover and discover what's inside.</p>
+
+    <button id="digScanButton" type="button" disabled>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+        <path d="M3 6h4l2-3h6l2 3h4v15H3z" stroke-linejoin="round"/>
+        <circle cx="12" cy="13" r="4"/>
+      </svg>
+      Scan a Record
+    </button>
+
+  </div>
+
+  <div class="dig-divider">
+    <span>OR SEARCH MANUALLY</span>
+  </div>
+
+  <form id="digSearchForm">
+
+    <div class="dig-search-field">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+        <circle cx="10.5" cy="10.5" r="6.5"/>
+        <path d="M15.5 15.5L21 21"/>
+      </svg>
+
+      <input
+        id="digSearchInput"
+        type="search"
+        placeholder="Search an artist or album..."
+        aria-label="Search an artist or album"
+        autocomplete="off"
+        required
+      >
+    </div>
+
+    <button id="digSearchButton" type="submit" disabled>
+      Search Music
+    </button>
+
+  </form>
+
+  <div id="digStatus" aria-live="polite"></div>
+
+  <div id="digResults"></div>
+
+  <div class="dig-tagline">
+    Your digital crate digging companion.
+  </div>
+
+</section>
+
+</main>
 <footer>Discover. Preview. Save. Repeat.</footer>
   <div id="miniPlayer" class="mini-player" hidden>
   <img id="miniArtwork" alt="Album artwork">
@@ -2044,6 +2309,40 @@ $("genre").onchange = () => {
   $("genreToggle").setAttribute("aria-expanded", "false");
   $("genreOptions").hidden = true;
 }
+  function setDigMode(open) {
+  $("musicView").hidden = open;
+  $("digView").hidden = !open;
+
+  document.querySelector(".category-bar").style.display =
+    open ? "none" : "";
+
+  $("digIcon").classList.toggle("dig-active", open);
+  $("digIcon").setAttribute("aria-pressed", String(open));
+  $("digIcon").setAttribute(
+    "aria-label",
+    open ? "Close Dig Mode" : "Open Dig Mode"
+  );
+
+  closeGenreMenu();
+  $("headerFilters").classList.remove("open");
+
+  window.scrollTo({
+    top: 0,
+    behavior: "instant"
+  });
+}
+
+$("digIcon").addEventListener("click", () => {
+  setDigMode($("digView").hidden);
+});
+
+$("digBack").addEventListener("click", () => {
+  setDigMode(false);
+});
+
+$("savedIcon").addEventListener("click", () => {
+  setDigMode(false);
+}, true);
 
 function updateGenreMenu() {
   const currentGenre = $("genre").value;
