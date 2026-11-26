@@ -788,9 +788,36 @@ footer{text-align:center;color:#888;font-size:12px;padding:30px}
   flex-shrink: 0;
 }
 
-.mini-track-info {
+.mini-track-group {
+  display: flex;
+  align-items: center;
   flex: 1;
   min-width: 0;
+  gap: 6px;
+}
+
+.mini-track-info {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+#miniSave {
+  color: #f5f1e8;
+  padding: 4px;
+  flex-shrink: 0;
+}
+
+#miniSave svg {
+  width: 28px;
+  height: 28px;
+}
+
+#miniSave[aria-pressed="true"] {
+  color: #c8a45d;
+}
+
+#miniSave[aria-pressed="true"] svg {
+  fill: #c8a45d;
 }
 
 #miniTitle {
@@ -1033,10 +1060,17 @@ footer{text-align:center;color:#888;font-size:12px;padding:30px}
 <footer>Discover. Preview. Save. Repeat.</footer>
   <div id="miniPlayer" class="mini-player" hidden>
   <img id="miniArtwork" alt="Album artwork">
+  <div class="mini-track-group">
   <div class="mini-track-info">
     <div id="miniTitle"></div>
     <div id="miniArtist"></div>
   </div>
+  <button id="miniSave" type="button" aria-label="Save song" aria-pressed="false">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true">
+      <path d="M6 3H18V21L12 17L6 21Z"/>
+    </svg>
+  </button>
+</div>
   <button id="miniPrevious" aria-label="Previous song"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5 5h2v14H5zM19 5v14L8 12z"/></svg></button>
   <button id="miniPlayPause" aria-label="Play or pause">▶</button>
   <button id="miniNext" aria-label="Next song"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17 5h2v14h-2zM5 5v14l11-7z"/></svg></button>
@@ -1214,6 +1248,17 @@ function updateMiniPlayer() {
 
   miniTitle.textContent = t.title || "Unknown title";
   miniArtist.textContent = t.artist || "Unknown artist";
+  const isSaved = saved.has(playing);
+
+$("miniSave").setAttribute(
+  "aria-pressed",
+  String(isSaved)
+);
+
+$("miniSave").setAttribute(
+  "aria-label",
+  isSaved ? "Remove from Saved" : "Save song"
+);
 
   const artwork = safeURL(t.artwork);
 
@@ -1538,33 +1583,38 @@ $("feed").addEventListener("keydown", e => {
     artwork.click();
   }
 });
+function toggleSavedTrack(id) {
+  const track = getTrack(id);
+
+  if (saved.has(id)) {
+    saved.delete(id);
+    delete savedTracks[id];
+  } else {
+    if (!track) return;
+    saved.add(id);
+    savedTracks[id] = track;
+  }
+
+  localStorage.setItem(
+    "freshspin-saved",
+    JSON.stringify([...saved])
+  );
+
+  localStorage.setItem(
+    "freshspin-saved-tracks",
+    JSON.stringify(savedTracks)
+  );
+
+  render();
+  updateMiniPlayer();
+}
+
 $("feed").addEventListener("click", async e => {
   const play = e.target.closest("[data-play]");
   const save = e.target.closest("[data-save]");
 
   if (save) {
-    const id = save.dataset.save;
-    const track = getTrack(id);
-
-    if (saved.has(id)) {
-      saved.delete(id);
-      delete savedTracks[id];
-    } else {
-      saved.add(id);
-      if (track) savedTracks[id] = track;
-    }
-
-    localStorage.setItem(
-      "freshspin-saved",
-      JSON.stringify([...saved])
-    );
-
-    localStorage.setItem(
-      "freshspin-saved-tracks",
-      JSON.stringify(savedTracks)
-    );
-
-    render();
+    toggleSavedTrack(save.dataset.save);
     return;
   }
 
@@ -1759,6 +1809,10 @@ audio.addEventListener("emptied", () => {
     render();
     alert("Couldn't start playback.");
   }
+});
+  $("miniSave").addEventListener("click", () => {
+  if (!playing) return;
+  toggleSavedTrack(playing);
 });
   $("miniNext").addEventListener("click", async () => {
   const queue = getPlaybackQueue();
