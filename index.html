@@ -2313,9 +2313,13 @@ $("genre").onchange = () => {
   $("musicView").hidden = open;
   $("digView").hidden = !open;
 
-  document.querySelector(".category-bar").style.display =
+ document.querySelector(".category-bar").style.display =
     open ? "none" : "";
 
+document.querySelector(".header-top").style.paddingBottom =
+    open ? "8px" : "";
+    document.querySelector(".daily-update-bar").style.display =
+    open ? "none" : "";
   $("digIcon").classList.toggle("dig-active", open);
   $("digIcon").setAttribute("aria-pressed", String(open));
   $("digIcon").setAttribute(
